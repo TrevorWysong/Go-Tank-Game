@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -19,22 +18,16 @@ const (
 )
 
 type Sprite struct {
-	pict   *ebiten.Image
-	xLoc   int
-	yLoc   int
-	dx     int
-	dy     int
-	width  float64
-	height float64
-}
-
-type WallsSprite struct {
-	pict   *ebiten.Image
-	xLoc   int
-	yLoc   int
-	angle  int
-	width  int
-	height int
+	upPict    *ebiten.Image
+	downPict  *ebiten.Image
+	leftPict  *ebiten.Image
+	rightPict *ebiten.Image
+	xLoc      int
+	yLoc      int
+	dx        int
+	dy        int
+	width     float64
+	height    float64
 }
 
 type Game struct {
@@ -43,10 +36,10 @@ type Game struct {
 	heartSprite1           Sprite
 	heartSprite2           Sprite
 	heartSprite3           Sprite
-	bottomWallSprite       WallsSprite
-	topWallSprite          WallsSprite
-	leftWallSprite         WallsSprite
-	rightWallSprite        WallsSprite
+	bottomWallSprite       Sprite
+	topWallSprite          Sprite
+	leftWallSprite         Sprite
+	rightWallSprite        Sprite
 	drawOps                ebiten.DrawImageOptions
 	collectedGold          bool
 	playerAndWallCollision bool
@@ -59,8 +52,8 @@ type Game struct {
 }
 
 func gotGold(player, gold Sprite) bool {
-	goldWidth, goldHeight := gold.pict.Size()
-	playerWidth, playerHeight := player.pict.Size()
+	goldWidth, goldHeight := gold.upPict.Size()
+	playerWidth, playerHeight := player.upPict.Size()
 	if player.xLoc < gold.xLoc+goldWidth &&
 		player.xLoc+playerWidth > gold.xLoc &&
 		player.yLoc < gold.yLoc+goldHeight &&
@@ -82,7 +75,6 @@ func boundaryWallCollision(player Sprite) bool {
 }
 
 func (game *Game) Update() error {
-	fmt.Println(game.deathCounter)
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
 		game.playerSprite.dx = -3
 		game.mostRecentKeyLeft = true
@@ -116,6 +108,7 @@ func (game *Game) Update() error {
 	}
 	game.playerSprite.yLoc += game.playerSprite.dy
 	game.playerSprite.xLoc += game.playerSprite.dx
+
 	if game.collectedGold == false {
 		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
 	}
@@ -135,59 +128,58 @@ func (game Game) Draw(screen *ebiten.Image) {
 	screen.Fill(colornames.Chocolate)
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.playerSprite.xLoc), float64(game.playerSprite.yLoc))
-	//game.drawOps.GeoM.Scale(0.10, 0.10)
 	if game.mostRecentKeyUp == true {
-
+		screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
 	} else if game.mostRecentKeyDown == true {
-
+		screen.DrawImage(game.playerSprite.downPict, &game.drawOps)
 	} else if game.mostRecentKeyRight == true {
-		//game.drawOps.GeoM.Rotate(225)
+		screen.DrawImage(game.playerSprite.rightPict, &game.drawOps)
 	} else if game.mostRecentKeyLeft == true {
-
+		screen.DrawImage(game.playerSprite.leftPict, &game.drawOps)
 	} else {
-
+		screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
 	}
-	//game.drawOps.GeoM.Rotate(180 * math.Pi / 360)
-	screen.DrawImage(game.playerSprite.pict, &game.drawOps)
+	//screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
 
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.bottomWallSprite.xLoc), float64(game.bottomWallSprite.yLoc))
-	screen.DrawImage(game.bottomWallSprite.pict, &game.drawOps)
+	screen.DrawImage(game.bottomWallSprite.upPict, &game.drawOps)
 
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.topWallSprite.xLoc), float64(game.topWallSprite.yLoc))
-	screen.DrawImage(game.topWallSprite.pict, &game.drawOps)
+	screen.DrawImage(game.topWallSprite.upPict, &game.drawOps)
 
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Rotate(180 * math.Pi / 360)
 	game.drawOps.GeoM.Translate(float64(game.leftWallSprite.xLoc), float64(game.leftWallSprite.yLoc))
-	screen.DrawImage(game.leftWallSprite.pict, &game.drawOps)
+	screen.DrawImage(game.leftWallSprite.upPict, &game.drawOps)
 
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Rotate(180 * math.Pi / 360)
 	game.drawOps.GeoM.Translate(float64(game.rightWallSprite.xLoc), float64(game.rightWallSprite.yLoc))
-	screen.DrawImage(game.rightWallSprite.pict, &game.drawOps)
+	screen.DrawImage(game.rightWallSprite.upPict, &game.drawOps)
+
 	if game.deathCounter == 0 {
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
-		screen.DrawImage(game.heartSprite1.pict, &game.drawOps)
+		screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.heartSprite2.xLoc), float64(game.heartSprite2.yLoc))
-		screen.DrawImage(game.heartSprite2.pict, &game.drawOps)
+		screen.DrawImage(game.heartSprite2.upPict, &game.drawOps)
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.heartSprite3.xLoc), float64(game.heartSprite3.yLoc))
-		screen.DrawImage(game.heartSprite3.pict, &game.drawOps)
+		screen.DrawImage(game.heartSprite3.upPict, &game.drawOps)
 	} else if game.deathCounter == 1 {
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
-		screen.DrawImage(game.heartSprite1.pict, &game.drawOps)
+		screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.heartSprite2.xLoc), float64(game.heartSprite2.yLoc))
-		screen.DrawImage(game.heartSprite2.pict, &game.drawOps)
+		screen.DrawImage(game.heartSprite2.upPict, &game.drawOps)
 	} else if game.deathCounter == 2 {
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
-		screen.DrawImage(game.heartSprite1.pict, &game.drawOps)
+		screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
 	} else if game.deathCounter > 2 {
 		game.gameOver = true
 	}
@@ -195,7 +187,7 @@ func (game Game) Draw(screen *ebiten.Image) {
 	if game.collectedGold == false {
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.coinSprite.xLoc), float64(game.coinSprite.yLoc))
-		screen.DrawImage(game.coinSprite.pict, &game.drawOps)
+		screen.DrawImage(game.coinSprite.upPict, &game.drawOps)
 	}
 	//if game.playerAndWallCollision == false{
 	//	game.drawOps.GeoM.Reset()
@@ -213,22 +205,22 @@ func main() {
 	ebiten.SetWindowTitle("Comp510 First Graphics")
 	gameObject := Game{}
 	loadImage(&gameObject)
-	playerWidth, _ := gameObject.playerSprite.pict.Size()
+	playerWidth, _ := gameObject.playerSprite.upPict.Size()
 	gameObject.playerSprite.xLoc = playerWidth
 	gameObject.playerSprite.yLoc = ScreenHeight / 2
 
-	coinWidth, coinHeight := gameObject.coinSprite.pict.Size()
+	coinWidth, coinHeight := gameObject.coinSprite.upPict.Size()
 	rand.Seed(int64(time.Now().Second()))
 	gameObject.coinSprite.xLoc = rand.Intn(ScreenWidth - coinWidth)
 	gameObject.coinSprite.yLoc = rand.Intn(ScreenHeight - coinHeight)
 
-	_, wallHeight := gameObject.leftWallSprite.pict.Size()
+	_, wallHeight := gameObject.leftWallSprite.upPict.Size()
 	gameObject.topWallSprite.yLoc = 0
 	gameObject.bottomWallSprite.yLoc = ScreenHeight - wallHeight
 	gameObject.leftWallSprite.xLoc = wallHeight
 	gameObject.rightWallSprite.xLoc = ScreenWidth
 
-	heartWidth, heartHeight := gameObject.heartSprite1.pict.Size()
+	heartWidth, heartHeight := gameObject.heartSprite1.upPict.Size()
 	gameObject.heartSprite1.yLoc = ScreenHeight - (wallHeight * 2) - heartHeight
 	gameObject.heartSprite1.xLoc = wallHeight * 2
 	gameObject.heartSprite2.yLoc = ScreenHeight - (wallHeight * 2) - heartHeight
@@ -244,32 +236,47 @@ func main() {
 }
 
 func loadImage(game *Game) {
-	pict, _, err := ebitenutil.NewImageFromFile("tankfilledtop2.png")
+	upPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquare.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	game.playerSprite.pict = pict
+	downPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquareDown.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	leftPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquareLeft.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	rightPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquareRight.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.playerSprite.upPict = upPlayer
+	game.playerSprite.downPict = downPlayer
+	game.playerSprite.leftPict = leftPlayer
+	game.playerSprite.rightPict = rightPlayer
 
 	coins, _, err := ebitenutil.NewImageFromFile("gold-coins-large.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	game.coinSprite.pict = coins
+	game.coinSprite.upPict = coins
 
 	boundaryWall, _, err := ebitenutil.NewImageFromFile("blueLine.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	game.bottomWallSprite.pict = boundaryWall
-	game.topWallSprite.pict = boundaryWall
-	game.rightWallSprite.pict = boundaryWall
-	game.leftWallSprite.pict = boundaryWall
+	game.bottomWallSprite.upPict = boundaryWall
+	game.topWallSprite.upPict = boundaryWall
+	game.rightWallSprite.upPict = boundaryWall
+	game.leftWallSprite.upPict = boundaryWall
 
 	heart, _, err := ebitenutil.NewImageFromFile("heartScaled.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	game.heartSprite1.pict = heart
-	game.heartSprite2.pict = heart
-	game.heartSprite3.pict = heart
+	game.heartSprite1.upPict = heart
+	game.heartSprite2.upPict = heart
+	game.heartSprite3.upPict = heart
 }
