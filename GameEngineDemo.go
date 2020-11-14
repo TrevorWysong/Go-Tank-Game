@@ -4,10 +4,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"golang.org/x/image/colornames"
 	_ "image/png"
 	"log"
-	"math"
 	"math/rand"
 	"time"
 )
@@ -36,10 +34,9 @@ type Game struct {
 	heartSprite1           Sprite
 	heartSprite2           Sprite
 	heartSprite3           Sprite
-	bottomWallSprite       Sprite
-	topWallSprite          Sprite
-	leftWallSprite         Sprite
-	rightWallSprite        Sprite
+	firstMap               Sprite
+	secondMap              Sprite
+	thirdMap               Sprite
 	drawOps                ebiten.DrawImageOptions
 	collectedGold          bool
 	playerAndWallCollision bool
@@ -63,12 +60,15 @@ func gotGold(player, gold Sprite) bool {
 	return false
 }
 
-func boundaryWallCollision(player Sprite) bool {
-	wallHeight := 8
-	// 74 x 80 (width x height)
-	playerWidth, playerHeight := 74, 80
-	if player.xLoc < 0+wallHeight || player.xLoc > ScreenWidth-wallHeight-playerWidth ||
-		player.yLoc > ScreenHeight-wallHeight-playerHeight || player.yLoc < 0+wallHeight {
+func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
+	boundaryWidth := 25
+	if anySprite.xLoc < 0+boundaryWidth || anySprite.xLoc > ScreenWidth-boundaryWidth-spriteWidth ||
+		anySprite.yLoc > ScreenHeight-boundaryWidth-spriteWidth || anySprite.yLoc < 0+boundaryWidth ||
+		anySprite.xLoc > 200-spriteWidth && anySprite.xLoc < 275 && anySprite.yLoc < 250 ||
+		anySprite.xLoc > 275-spriteWidth && anySprite.xLoc < 475 && anySprite.yLoc < 250 && anySprite.yLoc > 175-spriteWidth ||
+		anySprite.xLoc > 175-spriteWidth && anySprite.xLoc < 275 && anySprite.yLoc < 475 && anySprite.yLoc > 400-spriteWidth ||
+		anySprite.xLoc > 550-spriteWidth && anySprite.xLoc < 625 && anySprite.yLoc < 575 && anySprite.yLoc > 350-spriteWidth ||
+		anySprite.xLoc > 475-spriteWidth && anySprite.xLoc < 550 && anySprite.yLoc < 575 && anySprite.yLoc > 500-spriteWidth {
 		return true
 	}
 	return false
@@ -113,7 +113,7 @@ func (game *Game) Update() error {
 		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
 	}
 	if game.playerAndWallCollision == false {
-		game.playerAndWallCollision = boundaryWallCollision(game.playerSprite)
+		game.playerAndWallCollision = wallCollisionCheckFirstLevel(game.playerSprite, 61)
 	} else {
 		game.playerSprite.yLoc = ScreenHeight / 2
 		game.playerSprite.xLoc = 74 //player width
@@ -125,7 +125,11 @@ func (game *Game) Update() error {
 }
 
 func (game Game) Draw(screen *ebiten.Image) {
-	screen.Fill(colornames.Chocolate)
+	//screen.Fill(colornames.Chocolate)
+	game.drawOps.GeoM.Reset()
+	game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
+	screen.DrawImage(game.firstMap.upPict, &game.drawOps)
+
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.playerSprite.xLoc), float64(game.playerSprite.yLoc))
 	if game.mostRecentKeyUp == true {
@@ -140,24 +144,6 @@ func (game Game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
 	}
 	//screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
-
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Translate(float64(game.bottomWallSprite.xLoc), float64(game.bottomWallSprite.yLoc))
-	screen.DrawImage(game.bottomWallSprite.upPict, &game.drawOps)
-
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Translate(float64(game.topWallSprite.xLoc), float64(game.topWallSprite.yLoc))
-	screen.DrawImage(game.topWallSprite.upPict, &game.drawOps)
-
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Rotate(180 * math.Pi / 360)
-	game.drawOps.GeoM.Translate(float64(game.leftWallSprite.xLoc), float64(game.leftWallSprite.yLoc))
-	screen.DrawImage(game.leftWallSprite.upPict, &game.drawOps)
-
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Rotate(180 * math.Pi / 360)
-	game.drawOps.GeoM.Translate(float64(game.rightWallSprite.xLoc), float64(game.rightWallSprite.yLoc))
-	screen.DrawImage(game.rightWallSprite.upPict, &game.drawOps)
 
 	if game.deathCounter == 0 {
 		game.drawOps.GeoM.Reset()
@@ -189,11 +175,6 @@ func (game Game) Draw(screen *ebiten.Image) {
 		game.drawOps.GeoM.Translate(float64(game.coinSprite.xLoc), float64(game.coinSprite.yLoc))
 		screen.DrawImage(game.coinSprite.upPict, &game.drawOps)
 	}
-	//if game.playerAndWallCollision == false{
-	//	game.drawOps.GeoM.Reset()
-	//	game.drawOps.GeoM.Translate(float64(game.coinSprite.xLoc), float64(game.coinSprite.yLoc))
-	//	screen.DrawImage(game.coinSprite.pict, &game.drawOps)
-	//}
 }
 
 func (g Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
@@ -214,19 +195,20 @@ func main() {
 	gameObject.coinSprite.xLoc = rand.Intn(ScreenWidth - coinWidth)
 	gameObject.coinSprite.yLoc = rand.Intn(ScreenHeight - coinHeight)
 
-	_, wallHeight := gameObject.leftWallSprite.upPict.Size()
-	gameObject.topWallSprite.yLoc = 0
-	gameObject.bottomWallSprite.yLoc = ScreenHeight - wallHeight
-	gameObject.leftWallSprite.xLoc = wallHeight
-	gameObject.rightWallSprite.xLoc = ScreenWidth
+	//_, wallHeight := gameObject.leftWallSprite.upPict.Size()
+	//gameObject.topWallSprite.yLoc = 0
+	//gameObject.bottomWallSprite.yLoc = ScreenHeight - wallHeight
+	//gameObject.leftWallSprite.xLoc = wallHeight
+	//gameObject.rightWallSprite.xLoc = ScreenWidth
 
+	boundaryWidth := 25
 	heartWidth, heartHeight := gameObject.heartSprite1.upPict.Size()
-	gameObject.heartSprite1.yLoc = ScreenHeight - (wallHeight * 2) - heartHeight
-	gameObject.heartSprite1.xLoc = wallHeight * 2
-	gameObject.heartSprite2.yLoc = ScreenHeight - (wallHeight * 2) - heartHeight
-	gameObject.heartSprite2.xLoc = (wallHeight * 3) + (heartWidth)
-	gameObject.heartSprite3.yLoc = ScreenHeight - (wallHeight * 2) - heartHeight
-	gameObject.heartSprite3.xLoc = (wallHeight * 4) + (heartWidth * 2)
+	gameObject.heartSprite1.yLoc = ScreenHeight - (boundaryWidth * 2) - (heartHeight / 2)
+	gameObject.heartSprite1.xLoc = boundaryWidth + 16
+	gameObject.heartSprite2.yLoc = ScreenHeight - (boundaryWidth * 2) - (heartHeight / 2)
+	gameObject.heartSprite2.xLoc = (boundaryWidth + 20) + (heartWidth)
+	gameObject.heartSprite3.yLoc = ScreenHeight - (boundaryWidth * 2) - (heartHeight / 2)
+	gameObject.heartSprite3.xLoc = (boundaryWidth + 24) + (heartWidth * 2)
 
 	//gameObject.wallsSprite.xLoc = ScreenWidth/2
 
@@ -236,6 +218,12 @@ func main() {
 }
 
 func loadImage(game *Game) {
+	firstMap, _, err := ebitenutil.NewImageFromFile("Level1Correct.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.firstMap.upPict = firstMap
+
 	upPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquare.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
@@ -262,15 +250,6 @@ func loadImage(game *Game) {
 		log.Fatal("failed to load image", err)
 	}
 	game.coinSprite.upPict = coins
-
-	boundaryWall, _, err := ebitenutil.NewImageFromFile("blueLine.png")
-	if err != nil {
-		log.Fatal("failed to load image", err)
-	}
-	game.bottomWallSprite.upPict = boundaryWall
-	game.topWallSprite.upPict = boundaryWall
-	game.rightWallSprite.upPict = boundaryWall
-	game.leftWallSprite.upPict = boundaryWall
 
 	heart, _, err := ebitenutil.NewImageFromFile("heartScaled.png")
 	if err != nil {

@@ -2,16 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="00b1d884-569f-4270-84f5-2d92411e1285" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/tankFilledTopSquare.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tankFilledTopSquareDown.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tankFilledTopSquareLeft.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tankFilledTopSquareRight.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Level1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Level1Correct.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GameEngineDemo.go" beforeDir="false" afterPath="$PROJECT_DIR$/GameEngineDemo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/blueRectangle.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/galleon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tankfilledtop.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tankfilledtop2.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,16 +67,17 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="First commit for project 03 by Trevor Wysong" />
-    <option name="LAST_COMMIT_MESSAGE" value="First commit for project 03 by Trevor Wysong" />
+    <MESSAGE value="Second commit. I tried rotating sprites with built in method but the position gets offset around a circle and messed things up. I bruteforced the problem by loading in all directions of sprite and then drawing the corresponding one based on the last key press." />
+    <option name="LAST_COMMIT_MESSAGE" value="Second commit. I tried rotating sprites with built in method but the position gets offset around a circle and messed things up. I bruteforced the problem by loading in all directions of sprite and then drawing the corresponding one based on the last key press." />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state x="393" y="0" key="CommitChangelistDialog2" timestamp="1605381217715">
+    <state x="393" y="0" key="CommitChangelistDialog2" timestamp="1605386097194">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="393" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605381217715" />
+    <state x="393" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605386097194" />
     <state x="549" y="153" key="FileChooserDialogImpl" timestamp="1605381163956">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -91,26 +86,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="647" y="310" key="Github.ShareDialog/0.0.1536.824@0.0.1536.824" timestamp="1605381285752" />
-    <state width="1493" height="207" key="GridCell.Tab.0.bottom" timestamp="1605385939345">
+    <state width="1493" height="207" key="GridCell.Tab.0.bottom" timestamp="1605397077126">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605385939345" />
-    <state width="1493" height="207" key="GridCell.Tab.0.center" timestamp="1605385939345">
+    <state width="1493" height="207" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605397077126" />
+    <state width="1493" height="207" key="GridCell.Tab.0.center" timestamp="1605397077126">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605385939345" />
-    <state width="1493" height="207" key="GridCell.Tab.0.left" timestamp="1605385939345">
+    <state width="1493" height="207" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605397077126" />
+    <state width="1493" height="207" key="GridCell.Tab.0.left" timestamp="1605397077126">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605385939345" />
-    <state width="1493" height="207" key="GridCell.Tab.0.right" timestamp="1605385939345">
+    <state width="1493" height="207" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605397077126" />
+    <state width="1493" height="207" key="GridCell.Tab.0.right" timestamp="1605397077126">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605385939345" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605381183884">
+    <state width="1493" height="207" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605397077126" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605386100690">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605381183884" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605386100690" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1604453748557">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
