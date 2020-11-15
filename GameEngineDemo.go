@@ -29,28 +29,33 @@ type Sprite struct {
 }
 
 type Game struct {
-	playerSprite           Sprite
-	tankTopper             Sprite
-	coinSprite             Sprite
-	heartSprite1           Sprite
-	heartSprite2           Sprite
-	heartSprite3           Sprite
-	firstMap               Sprite
-	secondMap              Sprite
-	thirdMap               Sprite
-	drawOps                ebiten.DrawImageOptions
-	collectedGold          bool
-	playerAndWallCollision bool
-	mostRecentKeyLeft      bool
-	mostRecentKeyRight     bool
-	mostRecentKeyDown      bool
-	mostRecentKeyUp        bool
-	mostRecentKeyA         bool
-	mostRecentKeyS         bool
-	mostRecentKeyD         bool
-	mostRecentKeyW         bool
-	deathCounter           int
-	gameOver               bool
+	playerSprite               Sprite
+	tankTopper                 Sprite
+	fireball                   Sprite
+	coinSprite                 Sprite
+	heartSprite1               Sprite
+	heartSprite2               Sprite
+	heartSprite3               Sprite
+	firstMap                   Sprite
+	secondMap                  Sprite
+	thirdMap                   Sprite
+	drawOps                    ebiten.DrawImageOptions
+	collectedGold              bool
+	playerAndWallCollision     bool
+	projectileAndWallCollision bool
+	mostRecentKeyLeft          bool
+	mostRecentKeyRight         bool
+	mostRecentKeyDown          bool
+	mostRecentKeyUp            bool
+	mostRecentKeyA             bool
+	mostRecentKeyS             bool
+	mostRecentKeyD             bool
+	mostRecentKeyW             bool
+	deathCounter               int
+	projectileList             []Sprite
+	playerFireballCounter      int
+	playerFireballTimer        int
+	gameOver                   bool
 }
 
 func gotGold(player, gold Sprite) bool {
@@ -79,7 +84,21 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 	return false
 }
 
-func (game *Game) Update() error {
+func (game *Game) shootFireball() []Sprite {
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		game.projectileAndWallCollision = false
+		game.playerFireballCounter += 1
+		game.fireball.xLoc = game.playerSprite.xLoc
+		game.fireball.yLoc = game.playerSprite.yLoc
+
+		game.fireball.dx = 5
+	}
+	game.fireball.xLoc += game.fireball.dx
+	game.fireball.xLoc += game.fireball.dy
+	return game.projectileList
+}
+
+func (game *Game) changeTankDirection() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
 		game.playerSprite.dx = -3
 		game.mostRecentKeyLeft = true
@@ -111,7 +130,11 @@ func (game *Game) Update() error {
 	} else if inpututil.IsKeyJustReleased(ebiten.KeyUp) || inpututil.IsKeyJustReleased(ebiten.KeyDown) {
 		game.playerSprite.dy = 0
 	}
+	game.playerSprite.yLoc += game.playerSprite.dy
+	game.playerSprite.xLoc += game.playerSprite.dx
+}
 
+func (game *Game) changeTankTopperDirection() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
 		game.mostRecentKeyA = false
 		game.mostRecentKeyS = false
@@ -133,21 +156,8 @@ func (game *Game) Update() error {
 		game.mostRecentKeyD = true
 		game.mostRecentKeyW = false
 	}
-
-	game.playerSprite.yLoc += game.playerSprite.dy
-	game.playerSprite.xLoc += game.playerSprite.dx
-
-	if game.collectedGold == false {
-		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
-	}
-	if game.playerAndWallCollision == false {
-		game.playerAndWallCollision = wallCollisionCheckFirstLevel(game.playerSprite, 61)
-	} else {
-		game.playerSprite.yLoc = ScreenHeight / 2
-		game.playerSprite.xLoc = 74 //player width
-		game.playerAndWallCollision = false
-		game.deathCounter += 1
-	}
+}
+func (game *Game) manageTankTopperOffset() {
 	if game.mostRecentKeyA == true {
 		game.tankTopper.xLoc = game.playerSprite.xLoc - 7
 		game.tankTopper.yLoc = game.playerSprite.yLoc + 20
@@ -164,6 +174,33 @@ func (game *Game) Update() error {
 		game.tankTopper.xLoc = game.playerSprite.xLoc + 20
 		game.tankTopper.yLoc = game.playerSprite.yLoc - 7
 	}
+}
+
+func (game *Game) manageLevel1CollisionDetection() {
+	if game.collectedGold == false {
+		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
+	}
+
+	if game.playerAndWallCollision == false {
+		game.playerAndWallCollision = wallCollisionCheckFirstLevel(game.playerSprite, 61)
+	} else {
+		game.playerSprite.yLoc = ScreenHeight / 2
+		game.playerSprite.xLoc = 74 //player width
+		game.playerAndWallCollision = false
+		game.deathCounter += 1
+	}
+
+	if game.projectileAndWallCollision == false {
+		game.projectileAndWallCollision = wallCollisionCheckFirstLevel(game.fireball, 20)
+	}
+}
+
+func (game *Game) Update() error {
+	game.changeTankDirection()
+	game.changeTankTopperDirection()
+	game.shootFireball()
+	game.manageTankTopperOffset()
+	game.manageLevel1CollisionDetection()
 
 	return nil
 }
@@ -173,6 +210,12 @@ func (game Game) Draw(screen *ebiten.Image) {
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
 	screen.DrawImage(game.firstMap.upPict, &game.drawOps)
+
+	if game.projectileAndWallCollision == false {
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.fireball.xLoc), float64(game.fireball.yLoc))
+		screen.DrawImage(game.fireball.upPict, &game.drawOps)
+	}
 
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.playerSprite.xLoc), float64(game.playerSprite.yLoc))
@@ -256,12 +299,6 @@ func main() {
 	gameObject.coinSprite.xLoc = rand.Intn(ScreenWidth - coinWidth)
 	gameObject.coinSprite.yLoc = rand.Intn(ScreenHeight - coinHeight)
 
-	//_, wallHeight := gameObject.leftWallSprite.upPict.Size()
-	//gameObject.topWallSprite.yLoc = 0
-	//gameObject.bottomWallSprite.yLoc = ScreenHeight - wallHeight
-	//gameObject.leftWallSprite.xLoc = wallHeight
-	//gameObject.rightWallSprite.xLoc = ScreenWidth
-
 	boundaryWidth := 25
 	heartWidth, heartHeight := gameObject.heartSprite1.upPict.Size()
 	gameObject.heartSprite1.yLoc = ScreenHeight - (boundaryWidth * 2) - (heartHeight / 2)
@@ -270,8 +307,6 @@ func main() {
 	gameObject.heartSprite2.xLoc = (boundaryWidth + 20) + (heartWidth)
 	gameObject.heartSprite3.yLoc = ScreenHeight - (boundaryWidth * 2) - (heartHeight / 2)
 	gameObject.heartSprite3.xLoc = (boundaryWidth + 24) + (heartWidth * 2)
-
-	//gameObject.wallsSprite.xLoc = ScreenWidth/2
 
 	if err := ebiten.RunGame(&gameObject); err != nil {
 		log.Fatal("Oh no! something terrible happened", err)
@@ -326,6 +361,12 @@ func loadImage(game *Game) {
 	game.tankTopper.downPict = tankTopperDown
 	game.tankTopper.leftPict = tankTopperLeft
 	game.tankTopper.rightPict = tankTopperRight
+
+	fireball, _, err := ebitenutil.NewImageFromFile("fireball.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.fireball.upPict = fireball
 
 	coins, _, err := ebitenutil.NewImageFromFile("gold-coins-large.png")
 	if err != nil {
