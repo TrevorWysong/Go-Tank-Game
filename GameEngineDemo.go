@@ -31,6 +31,8 @@ type Sprite struct {
 
 type Game struct {
 	playerSprite               Sprite
+	personEnemy                Sprite
+	monsterEnemy               Sprite
 	tankTopper                 Sprite
 	fireball                   Sprite
 	coinSprite                 Sprite
@@ -53,10 +55,12 @@ type Game struct {
 	mostRecentKeyD             bool
 	mostRecentKeyW             bool
 	deathCounter               int
+	score                      int
 	projectileList             []Sprite
 	projectileHold             bool
-	playerFireballCounter      int
-	playerFireballTimer        int
+	levelOneIsActive           bool
+	levelTwoIsActive           bool
+	levelThreeIsActive         bool
 	gameOver                   bool
 }
 
@@ -94,7 +98,6 @@ func (game *Game) shootFireball() []Sprite {
 			game.projectileHold = false
 		}()
 		game.projectileAndWallCollision = false
-		game.playerFireballCounter += 1
 		tempFireball := game.fireball
 
 		if game.mostRecentKeyW == true {
@@ -103,21 +106,18 @@ func (game *Game) shootFireball() []Sprite {
 			tempFireball.dx = 0
 			tempFireball.dy = -10
 			game.projectileList = append(game.projectileList, tempFireball)
-
 		} else if game.mostRecentKeyS == true {
 			tempFireball.xLoc = game.playerSprite.xLoc + 20
 			tempFireball.yLoc = game.playerSprite.yLoc + 55
 			tempFireball.dx = 0
 			tempFireball.dy = 10
 			game.projectileList = append(game.projectileList, tempFireball)
-
 		} else if game.mostRecentKeyA == true {
 			tempFireball.xLoc = game.playerSprite.xLoc - 15
 			tempFireball.yLoc = game.playerSprite.yLoc + 18
 			tempFireball.dx = -10
 			tempFireball.dy = 0
 			game.projectileList = append(game.projectileList, tempFireball)
-
 		} else if game.mostRecentKeyD == true {
 			tempFireball.xLoc = game.playerSprite.xLoc + 55
 			tempFireball.yLoc = game.playerSprite.yLoc + 18
@@ -131,10 +131,7 @@ func (game *Game) shootFireball() []Sprite {
 			tempFireball.dy = -10
 			game.projectileList = append(game.projectileList, tempFireball)
 		}
-
-		//game.projectileList = append(game.projectileList, tempFireball)
 	}
-
 	return game.projectileList
 }
 
@@ -216,6 +213,10 @@ func (game *Game) manageTankTopperOffset() {
 	}
 }
 
+func (game *Game) spawnLevel1Enemies() {
+
+}
+
 func (game *Game) manageLevel1CollisionDetection() {
 	if game.collectedGold == false {
 		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
@@ -240,95 +241,137 @@ func (game *Game) manageLevel1CollisionDetection() {
 	}
 }
 
-func (game *Game) Update() error {
-	game.changeTankDirection()
-	game.changeTankTopperDirection()
-	game.shootFireball()
-	game.manageTankTopperOffset()
-	game.manageLevel1CollisionDetection()
+func (game *Game) checkLevel() {
+	if game.gameOver == false {
+		if game.score < 1000 {
+			game.levelOneIsActive = true
+			game.levelTwoIsActive = false
+			game.levelThreeIsActive = false
+		} else if game.score >= 1000 && game.score < 2000 {
+			game.levelOneIsActive = false
+			game.levelTwoIsActive = true
+			game.levelThreeIsActive = false
+		} else if game.score >= 2000 {
+			game.levelOneIsActive = false
+			game.levelTwoIsActive = false
+			game.levelThreeIsActive = true
+		} else {
+			game.levelOneIsActive = true
+			game.levelTwoIsActive = false
+			game.levelThreeIsActive = false
+		}
+	} else {
+		game.levelOneIsActive = false
+		game.levelTwoIsActive = false
+		game.levelThreeIsActive = false
+	}
+}
 
+func (game *Game) Update() error {
+	if game.deathCounter >= 3 {
+		game.gameOver = true
+	} else {
+		game.gameOver = false
+	}
+	if game.levelOneIsActive == true {
+		game.spawnLevel1Enemies()
+		game.changeTankDirection()
+		game.changeTankTopperDirection()
+		game.shootFireball()
+		game.manageTankTopperOffset()
+		game.manageLevel1CollisionDetection()
+	} else if game.levelTwoIsActive == true {
+
+	} else if game.levelThreeIsActive == true {
+
+	} else if game.gameOver == true {
+
+	} else {
+		game.spawnLevel1Enemies()
+		game.changeTankDirection()
+		game.changeTankTopperDirection()
+		game.shootFireball()
+		game.manageTankTopperOffset()
+		game.manageLevel1CollisionDetection()
+	}
 	return nil
 }
 
 func (game Game) Draw(screen *ebiten.Image) {
 	//screen.Fill(colornames.Chocolate)
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
-	screen.DrawImage(game.firstMap.upPict, &game.drawOps)
+	if game.gameOver == false {
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
+		screen.DrawImage(game.firstMap.upPict, &game.drawOps)
 
-	if len(game.projectileList) > 0 {
-		for i := 0; i < len(game.projectileList); i++ {
-			if game.projectileList[i].collision == false {
-				game.drawOps.GeoM.Reset()
-				game.drawOps.GeoM.Translate(float64(game.projectileList[i].xLoc), float64(game.projectileList[i].yLoc))
-				screen.DrawImage(game.projectileList[i].upPict, &game.drawOps)
+		if len(game.projectileList) > 0 {
+			for i := 0; i < len(game.projectileList); i++ {
+				if game.projectileList[i].collision == false {
+					game.drawOps.GeoM.Reset()
+					game.drawOps.GeoM.Translate(float64(game.projectileList[i].xLoc), float64(game.projectileList[i].yLoc))
+					screen.DrawImage(game.projectileList[i].upPict, &game.drawOps)
+				}
 			}
 		}
-	}
 
-	//if game.projectileAndWallCollision == false {
-	//	game.drawOps.GeoM.Reset()
-	//	game.drawOps.GeoM.Translate(float64(game.fireball.xLoc), float64(game.fireball.yLoc))
-	//	screen.DrawImage(game.fireball.upPict, &game.drawOps)
-	//}
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.playerSprite.xLoc), float64(game.playerSprite.yLoc))
+		if game.mostRecentKeyUp == true {
+			screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
+		} else if game.mostRecentKeyDown == true {
+			screen.DrawImage(game.playerSprite.downPict, &game.drawOps)
+		} else if game.mostRecentKeyRight == true {
+			screen.DrawImage(game.playerSprite.rightPict, &game.drawOps)
+		} else if game.mostRecentKeyLeft == true {
+			screen.DrawImage(game.playerSprite.leftPict, &game.drawOps)
+		} else {
+			screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
+		}
 
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Translate(float64(game.playerSprite.xLoc), float64(game.playerSprite.yLoc))
-	if game.mostRecentKeyUp == true {
-		screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
-	} else if game.mostRecentKeyDown == true {
-		screen.DrawImage(game.playerSprite.downPict, &game.drawOps)
-	} else if game.mostRecentKeyRight == true {
-		screen.DrawImage(game.playerSprite.rightPict, &game.drawOps)
-	} else if game.mostRecentKeyLeft == true {
-		screen.DrawImage(game.playerSprite.leftPict, &game.drawOps)
-	} else {
-		screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
-	}
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.tankTopper.xLoc), float64(game.tankTopper.yLoc))
+		if game.mostRecentKeyW == true {
+			screen.DrawImage(game.tankTopper.upPict, &game.drawOps)
+		} else if game.mostRecentKeyS == true {
+			screen.DrawImage(game.tankTopper.downPict, &game.drawOps)
+		} else if game.mostRecentKeyD == true {
+			screen.DrawImage(game.tankTopper.rightPict, &game.drawOps)
+		} else if game.mostRecentKeyA == true {
+			screen.DrawImage(game.tankTopper.leftPict, &game.drawOps)
+		} else {
+			screen.DrawImage(game.tankTopper.upPict, &game.drawOps)
+		}
 
-	game.drawOps.GeoM.Reset()
-	game.drawOps.GeoM.Translate(float64(game.tankTopper.xLoc), float64(game.tankTopper.yLoc))
-	if game.mostRecentKeyW == true {
-		screen.DrawImage(game.tankTopper.upPict, &game.drawOps)
-	} else if game.mostRecentKeyS == true {
-		screen.DrawImage(game.tankTopper.downPict, &game.drawOps)
-	} else if game.mostRecentKeyD == true {
-		screen.DrawImage(game.tankTopper.rightPict, &game.drawOps)
-	} else if game.mostRecentKeyA == true {
-		screen.DrawImage(game.tankTopper.leftPict, &game.drawOps)
-	} else {
-		screen.DrawImage(game.tankTopper.upPict, &game.drawOps)
-	}
+		if game.deathCounter == 0 {
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
+			screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.heartSprite2.xLoc), float64(game.heartSprite2.yLoc))
+			screen.DrawImage(game.heartSprite2.upPict, &game.drawOps)
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.heartSprite3.xLoc), float64(game.heartSprite3.yLoc))
+			screen.DrawImage(game.heartSprite3.upPict, &game.drawOps)
+		} else if game.deathCounter == 1 {
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
+			screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.heartSprite2.xLoc), float64(game.heartSprite2.yLoc))
+			screen.DrawImage(game.heartSprite2.upPict, &game.drawOps)
+		} else if game.deathCounter == 2 {
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
+			screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
+		} else if game.deathCounter > 2 {
+			game.gameOver = true
+		}
 
-	if game.deathCounter == 0 {
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
-		screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.heartSprite2.xLoc), float64(game.heartSprite2.yLoc))
-		screen.DrawImage(game.heartSprite2.upPict, &game.drawOps)
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.heartSprite3.xLoc), float64(game.heartSprite3.yLoc))
-		screen.DrawImage(game.heartSprite3.upPict, &game.drawOps)
-	} else if game.deathCounter == 1 {
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
-		screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.heartSprite2.xLoc), float64(game.heartSprite2.yLoc))
-		screen.DrawImage(game.heartSprite2.upPict, &game.drawOps)
-	} else if game.deathCounter == 2 {
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.heartSprite1.xLoc), float64(game.heartSprite1.yLoc))
-		screen.DrawImage(game.heartSprite1.upPict, &game.drawOps)
-	} else if game.deathCounter > 2 {
-		game.gameOver = true
-	}
-
-	if game.collectedGold == false {
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.coinSprite.xLoc), float64(game.coinSprite.yLoc))
-		screen.DrawImage(game.coinSprite.upPict, &game.drawOps)
+		if game.collectedGold == false {
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.coinSprite.xLoc), float64(game.coinSprite.yLoc))
+			screen.DrawImage(game.coinSprite.upPict, &game.drawOps)
+		}
 	}
 }
 
@@ -338,7 +381,7 @@ func (g Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight
 
 func main() {
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
-	ebiten.SetWindowTitle("Comp510 First Graphics")
+	ebiten.SetWindowTitle("Berserk/Tank Game by Trevor Wysong")
 	gameObject := Game{}
 	loadImage(&gameObject)
 
@@ -428,6 +471,48 @@ func loadImage(game *Game) {
 		log.Fatal("failed to load image", err)
 	}
 	game.coinSprite.upPict = coins
+
+	personEnemyUp, _, err := ebitenutil.NewImageFromFile("personEnemyUp.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	personEnemyDown, _, err := ebitenutil.NewImageFromFile("personEnemyDown.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	personEnemyLeft, _, err := ebitenutil.NewImageFromFile("personEnemyLeft.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	personEnemyRight, _, err := ebitenutil.NewImageFromFile("personEnemyRight.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.personEnemy.upPict = personEnemyUp
+	game.personEnemy.downPict = personEnemyDown
+	game.personEnemy.leftPict = personEnemyLeft
+	game.personEnemy.rightPict = personEnemyRight
+
+	monsterEnemyUp, _, err := ebitenutil.NewImageFromFile("monsterEnemyUp.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	monsterEnemyDown, _, err := ebitenutil.NewImageFromFile("monsterEnemyDown.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	monsterEnemyLeft, _, err := ebitenutil.NewImageFromFile("monsterEnemyLeft.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	monsterEnemyRight, _, err := ebitenutil.NewImageFromFile("monsterEnemyRight.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.monsterEnemy.upPict = monsterEnemyUp
+	game.monsterEnemy.downPict = monsterEnemyDown
+	game.monsterEnemy.leftPict = monsterEnemyLeft
+	game.monsterEnemy.rightPict = monsterEnemyRight
 
 	heart, _, err := ebitenutil.NewImageFromFile("heartScaled.png")
 	if err != nil {

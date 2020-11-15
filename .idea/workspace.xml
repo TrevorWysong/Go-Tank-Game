@@ -2,8 +2,17 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="00b1d884-569f-4270-84f5-2d92411e1285" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/monsterEnemyDown.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monsterEnemyLeft.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monsterEnemyRight.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/monsterEnemyUp.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personEnemyDown.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personEnemyLeft.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personEnemyRight.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/personEnemyUp.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GameEngineDemo.go" beforeDir="false" afterPath="$PROJECT_DIR$/GameEngineDemo.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/blueLine.png" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,16 +80,17 @@
     <MESSAGE value="Cleaned update function and created separate functions for different tasks so that they can be called in update in 1 line." />
     <MESSAGE value="Cleaned update function and created separate functions for different tasks so that they can be called in update in 1 line. Began writing code for projectiles." />
     <MESSAGE value="Got projectiles working so that they can be shot multiple at a time and each shot stops being drawn if there is a collision with wall. Now I will work on adding a timer to delay shots and fixing the shot offset and direction based on the tank topper direction." />
-    <option name="LAST_COMMIT_MESSAGE" value="Got projectiles working so that they can be shot multiple at a time and each shot stops being drawn if there is a collision with wall. Now I will work on adding a timer to delay shots and fixing the shot offset and direction based on the tank topper direction." />
+    <MESSAGE value="Added appropriate offsets and direction for player projectiles based on tank topper rotation and position." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added appropriate offsets and direction for player projectiles based on tank topper rotation and position." />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1605472193407">
+    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1605474178368">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605472193407" />
+    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605474178368" />
     <state x="549" y="153" key="FileChooserDialogImpl" timestamp="1605381163956">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -89,26 +99,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="647" y="310" key="Github.ShareDialog/0.0.1536.824@0.0.1536.824" timestamp="1605381285752" />
-    <state width="1493" height="207" key="GridCell.Tab.0.bottom" timestamp="1605473897851">
+    <state width="1493" height="207" key="GridCell.Tab.0.bottom" timestamp="1605479010680">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605473897851" />
-    <state width="1493" height="207" key="GridCell.Tab.0.center" timestamp="1605473897850">
+    <state width="1493" height="207" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605479010680" />
+    <state width="1493" height="207" key="GridCell.Tab.0.center" timestamp="1605479010680">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605473897850" />
-    <state width="1493" height="207" key="GridCell.Tab.0.left" timestamp="1605473897850">
+    <state width="1493" height="207" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605479010680" />
+    <state width="1493" height="207" key="GridCell.Tab.0.left" timestamp="1605479010680">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605473897850" />
-    <state width="1493" height="207" key="GridCell.Tab.0.right" timestamp="1605473897851">
+    <state width="1493" height="207" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605479010680" />
+    <state width="1493" height="207" key="GridCell.Tab.0.right" timestamp="1605479010680">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605473897851" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605472196919">
+    <state width="1493" height="207" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605479010680" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605474181393">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605472196919" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605474181393" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1604453748557">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
