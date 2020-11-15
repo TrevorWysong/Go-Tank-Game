@@ -30,6 +30,7 @@ type Sprite struct {
 
 type Game struct {
 	playerSprite           Sprite
+	tankTopper             Sprite
 	coinSprite             Sprite
 	heartSprite1           Sprite
 	heartSprite2           Sprite
@@ -44,6 +45,10 @@ type Game struct {
 	mostRecentKeyRight     bool
 	mostRecentKeyDown      bool
 	mostRecentKeyUp        bool
+	mostRecentKeyA         bool
+	mostRecentKeyS         bool
+	mostRecentKeyD         bool
+	mostRecentKeyW         bool
 	deathCounter           int
 	gameOver               bool
 }
@@ -106,6 +111,29 @@ func (game *Game) Update() error {
 	} else if inpututil.IsKeyJustReleased(ebiten.KeyUp) || inpututil.IsKeyJustReleased(ebiten.KeyDown) {
 		game.playerSprite.dy = 0
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		game.mostRecentKeyA = false
+		game.mostRecentKeyS = false
+		game.mostRecentKeyD = false
+		game.mostRecentKeyW = true
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		game.mostRecentKeyA = false
+		game.mostRecentKeyS = true
+		game.mostRecentKeyD = false
+		game.mostRecentKeyW = false
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		game.mostRecentKeyA = true
+		game.mostRecentKeyS = false
+		game.mostRecentKeyD = false
+		game.mostRecentKeyW = false
+	} else if inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		game.mostRecentKeyA = false
+		game.mostRecentKeyS = false
+		game.mostRecentKeyD = true
+		game.mostRecentKeyW = false
+	}
+
 	game.playerSprite.yLoc += game.playerSprite.dy
 	game.playerSprite.xLoc += game.playerSprite.dx
 
@@ -119,6 +147,22 @@ func (game *Game) Update() error {
 		game.playerSprite.xLoc = 74 //player width
 		game.playerAndWallCollision = false
 		game.deathCounter += 1
+	}
+	if game.mostRecentKeyA == true {
+		game.tankTopper.xLoc = game.playerSprite.xLoc - 7
+		game.tankTopper.yLoc = game.playerSprite.yLoc + 20
+	} else if game.mostRecentKeyD == true {
+		game.tankTopper.xLoc = game.playerSprite.xLoc + 20
+		game.tankTopper.yLoc = game.playerSprite.yLoc + 20
+	} else if game.mostRecentKeyS == true {
+		game.tankTopper.xLoc = game.playerSprite.xLoc + 20
+		game.tankTopper.yLoc = game.playerSprite.yLoc + 20
+	} else if game.mostRecentKeyW == true {
+		game.tankTopper.xLoc = game.playerSprite.xLoc + 20
+		game.tankTopper.yLoc = game.playerSprite.yLoc - 7
+	} else {
+		game.tankTopper.xLoc = game.playerSprite.xLoc + 20
+		game.tankTopper.yLoc = game.playerSprite.yLoc - 7
 	}
 
 	return nil
@@ -143,7 +187,20 @@ func (game Game) Draw(screen *ebiten.Image) {
 	} else {
 		screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
 	}
-	//screen.DrawImage(game.playerSprite.upPict, &game.drawOps)
+
+	game.drawOps.GeoM.Reset()
+	game.drawOps.GeoM.Translate(float64(game.tankTopper.xLoc), float64(game.tankTopper.yLoc))
+	if game.mostRecentKeyW == true {
+		screen.DrawImage(game.tankTopper.upPict, &game.drawOps)
+	} else if game.mostRecentKeyS == true {
+		screen.DrawImage(game.tankTopper.downPict, &game.drawOps)
+	} else if game.mostRecentKeyD == true {
+		screen.DrawImage(game.tankTopper.rightPict, &game.drawOps)
+	} else if game.mostRecentKeyA == true {
+		screen.DrawImage(game.tankTopper.leftPict, &game.drawOps)
+	} else {
+		screen.DrawImage(game.tankTopper.upPict, &game.drawOps)
+	}
 
 	if game.deathCounter == 0 {
 		game.drawOps.GeoM.Reset()
@@ -186,6 +243,10 @@ func main() {
 	ebiten.SetWindowTitle("Comp510 First Graphics")
 	gameObject := Game{}
 	loadImage(&gameObject)
+
+	gameObject.tankTopper.xLoc = gameObject.playerSprite.xLoc
+	gameObject.tankTopper.yLoc = gameObject.playerSprite.yLoc
+
 	playerWidth, _ := gameObject.playerSprite.upPict.Size()
 	gameObject.playerSprite.xLoc = playerWidth
 	gameObject.playerSprite.yLoc = ScreenHeight / 2
@@ -244,6 +305,27 @@ func loadImage(game *Game) {
 	game.playerSprite.downPict = downPlayer
 	game.playerSprite.leftPict = leftPlayer
 	game.playerSprite.rightPict = rightPlayer
+
+	tankTopperUp, _, err := ebitenutil.NewImageFromFile("tankTopper.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	tankTopperDown, _, err := ebitenutil.NewImageFromFile("tankTopperDown.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	tankTopperLeft, _, err := ebitenutil.NewImageFromFile("tankTopperLeft.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	tankTopperRight, _, err := ebitenutil.NewImageFromFile("tankTopperRight.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.tankTopper.upPict = tankTopperUp
+	game.tankTopper.downPict = tankTopperDown
+	game.tankTopper.leftPict = tankTopperLeft
+	game.tankTopper.rightPict = tankTopperRight
 
 	coins, _, err := ebitenutil.NewImageFromFile("gold-coins-large.png")
 	if err != nil {
