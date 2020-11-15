@@ -26,6 +26,7 @@ type Sprite struct {
 	dy        int
 	width     float64
 	height    float64
+	collision bool
 }
 
 type Game struct {
@@ -53,6 +54,7 @@ type Game struct {
 	mostRecentKeyW             bool
 	deathCounter               int
 	projectileList             []Sprite
+	projectileHold             bool
 	playerFireballCounter      int
 	playerFireballTimer        int
 	gameOver                   bool
@@ -85,16 +87,18 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 }
 
 func (game *Game) shootFireball() []Sprite {
-	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.projectileHold == false {
 		game.projectileAndWallCollision = false
 		game.playerFireballCounter += 1
-		game.fireball.xLoc = game.playerSprite.xLoc
-		game.fireball.yLoc = game.playerSprite.yLoc
+		tempFireball := game.fireball
+		tempFireball.xLoc = game.playerSprite.xLoc
+		tempFireball.yLoc = game.playerSprite.yLoc
+		tempFireball.dx = 5
+		tempFireball.dy = 0
 
-		game.fireball.dx = 5
+		game.projectileList = append(game.projectileList, tempFireball)
 	}
-	game.fireball.xLoc += game.fireball.dx
-	game.fireball.xLoc += game.fireball.dy
+
 	return game.projectileList
 }
 
@@ -189,10 +193,19 @@ func (game *Game) manageLevel1CollisionDetection() {
 		game.playerAndWallCollision = false
 		game.deathCounter += 1
 	}
-
-	if game.projectileAndWallCollision == false {
-		game.projectileAndWallCollision = wallCollisionCheckFirstLevel(game.fireball, 20)
+	if len(game.projectileList) > 0 {
+		for i := 0; i < len(game.projectileList); i++ {
+			if game.projectileList[i].collision == false {
+				game.projectileList[i].xLoc += game.projectileList[i].dx
+				game.projectileList[i].yLoc += game.projectileList[i].dy
+				game.projectileList[i].collision = wallCollisionCheckFirstLevel(game.projectileList[i], 20)
+			}
+		}
 	}
+
+	//if game.projectileAndWallCollision == false {
+	//	game.projectileAndWallCollision = wallCollisionCheckFirstLevel(game.fireball, 20)
+	//}
 }
 
 func (game *Game) Update() error {
@@ -211,11 +224,21 @@ func (game Game) Draw(screen *ebiten.Image) {
 	game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
 	screen.DrawImage(game.firstMap.upPict, &game.drawOps)
 
-	if game.projectileAndWallCollision == false {
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.fireball.xLoc), float64(game.fireball.yLoc))
-		screen.DrawImage(game.fireball.upPict, &game.drawOps)
+	if len(game.projectileList) > 0 {
+		for i := 0; i < len(game.projectileList); i++ {
+			if game.projectileList[i].collision == false {
+				game.drawOps.GeoM.Reset()
+				game.drawOps.GeoM.Translate(float64(game.projectileList[i].xLoc), float64(game.projectileList[i].yLoc))
+				screen.DrawImage(game.projectileList[i].upPict, &game.drawOps)
+			}
+		}
 	}
+
+	//if game.projectileAndWallCollision == false {
+	//	game.drawOps.GeoM.Reset()
+	//	game.drawOps.GeoM.Translate(float64(game.fireball.xLoc), float64(game.fireball.yLoc))
+	//	screen.DrawImage(game.fireball.upPict, &game.drawOps)
+	//}
 
 	game.drawOps.GeoM.Reset()
 	game.drawOps.GeoM.Translate(float64(game.playerSprite.xLoc), float64(game.playerSprite.yLoc))
