@@ -88,15 +88,51 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 
 func (game *Game) shootFireball() []Sprite {
 	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.projectileHold == false {
+		game.projectileHold = true
+		go func() {
+			<-time.After(500 * time.Millisecond)
+			game.projectileHold = false
+		}()
 		game.projectileAndWallCollision = false
 		game.playerFireballCounter += 1
 		tempFireball := game.fireball
-		tempFireball.xLoc = game.playerSprite.xLoc
-		tempFireball.yLoc = game.playerSprite.yLoc
-		tempFireball.dx = 5
-		tempFireball.dy = 0
 
-		game.projectileList = append(game.projectileList, tempFireball)
+		if game.mostRecentKeyW == true {
+			tempFireball.xLoc = game.playerSprite.xLoc + 20
+			tempFireball.yLoc = game.playerSprite.yLoc - 18
+			tempFireball.dx = 0
+			tempFireball.dy = -10
+			game.projectileList = append(game.projectileList, tempFireball)
+
+		} else if game.mostRecentKeyS == true {
+			tempFireball.xLoc = game.playerSprite.xLoc + 20
+			tempFireball.yLoc = game.playerSprite.yLoc + 55
+			tempFireball.dx = 0
+			tempFireball.dy = 10
+			game.projectileList = append(game.projectileList, tempFireball)
+
+		} else if game.mostRecentKeyA == true {
+			tempFireball.xLoc = game.playerSprite.xLoc - 15
+			tempFireball.yLoc = game.playerSprite.yLoc + 18
+			tempFireball.dx = -10
+			tempFireball.dy = 0
+			game.projectileList = append(game.projectileList, tempFireball)
+
+		} else if game.mostRecentKeyD == true {
+			tempFireball.xLoc = game.playerSprite.xLoc + 55
+			tempFireball.yLoc = game.playerSprite.yLoc + 18
+			tempFireball.dx = 10
+			tempFireball.dy = 0
+			game.projectileList = append(game.projectileList, tempFireball)
+		} else {
+			tempFireball.xLoc = game.playerSprite.xLoc + 20
+			tempFireball.yLoc = game.playerSprite.yLoc - 18
+			tempFireball.dx = 0
+			tempFireball.dy = -10
+			game.projectileList = append(game.projectileList, tempFireball)
+		}
+
+		//game.projectileList = append(game.projectileList, tempFireball)
 	}
 
 	return game.projectileList
@@ -202,10 +238,6 @@ func (game *Game) manageLevel1CollisionDetection() {
 			}
 		}
 	}
-
-	//if game.projectileAndWallCollision == false {
-	//	game.projectileAndWallCollision = wallCollisionCheckFirstLevel(game.fireball, 20)
-	//}
 }
 
 func (game *Game) Update() error {
