@@ -8,6 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	_ "image/png"
 	"log"
+	"math"
 	"math/rand"
 	"time"
 )
@@ -18,19 +19,20 @@ const (
 )
 
 type Sprite struct {
-	upPict    *ebiten.Image
-	downPict  *ebiten.Image
-	leftPict  *ebiten.Image
-	rightPict *ebiten.Image
-	xLoc      int
-	yLoc      int
-	dx        int
-	dy        int
-	width     float64
-	height    float64
-	collision bool
-	direction string
-	health    int
+	upPict            *ebiten.Image
+	downPict          *ebiten.Image
+	leftPict          *ebiten.Image
+	rightPict         *ebiten.Image
+	xLoc              int
+	yLoc              int
+	dx                int
+	dy                int
+	width             float64
+	height            float64
+	collision         bool
+	direction         string
+	health            int
+	inPlayerProximity bool
 }
 
 type Game struct {
@@ -134,7 +136,7 @@ func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, pl
 	return death
 }
 
-func (game *Game) shootFireball() []Sprite {
+func (game *Game) playerShootFireball() []Sprite {
 	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.projectileHold == false {
 		game.projectileHold = true
 		go func() {
@@ -293,88 +295,201 @@ func (game *Game) movementLevel1Enemies() {
 	if len(game.levelOneEnemyList) == 4 {
 		for i := 0; i < len(game.levelOneEnemyList); i++ {
 			//personEnemy1 moves up and down along left side
-			if i == 0 {
-				if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc < 500 {
-					game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
+			if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) < 150 &&
+				math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) < 150 {
+				//enemy is to the left and above player
+				game.levelOneEnemyList[i].inPlayerProximity = true
+				if game.levelOneEnemyList[i].xLoc <= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
+					game.levelOneEnemyList[i].dx = 1
+					game.levelOneEnemyList[i].dy = 1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "right"
+					} else {
+						game.levelOneEnemyList[i].direction = "down"
+					}
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-				} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 500 {
-					game.levelOneEnemyList[i].direction = "up"
-					game.levelOneEnemyList[i].dy = 0
-				} else if game.levelOneEnemyList[i].direction == "up" &&
-					game.levelOneEnemyList[i].yLoc > 40 {
-					game.levelOneEnemyList[i].dy = -personEnemyMovementSpeed
+				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
+					//enemy to the right and above player
+					game.levelOneEnemyList[i].dx = -1
+					game.levelOneEnemyList[i].dy = 1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "left"
+					} else {
+						game.levelOneEnemyList[i].direction = "down"
+					}
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-				} else if game.levelOneEnemyList[i].direction == "up" &&
-					game.levelOneEnemyList[i].yLoc <= 40 {
-					game.levelOneEnemyList[i].direction = "down"
-					game.levelOneEnemyList[i].dy = 0
+				} else if game.levelOneEnemyList[i].xLoc <= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
+					//enemy to the left and below player
+					game.levelOneEnemyList[i].dx = 1
+					game.levelOneEnemyList[i].dy = -1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "right"
+					} else {
+						game.levelOneEnemyList[i].direction = "up"
+					}
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
+					//enemy location to the right and below
+					game.levelOneEnemyList[i].dx = -1
+					game.levelOneEnemyList[i].dy = -1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "left"
+					} else {
+						game.levelOneEnemyList[i].direction = "up"
+					}
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
 				}
-			} else if i == 1 {
-				// personEnemy2 moves around in a square
-				if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].yLoc <= 285 &&
-					game.levelOneEnemyList[i].xLoc <= 425 && game.levelOneEnemyList[i].xLoc > 285 {
-					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
-					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].yLoc <= 285 &&
-					game.levelOneEnemyList[i].xLoc <= 285 {
-					game.levelOneEnemyList[i].direction = "down"
-					game.levelOneEnemyList[i].dx = 0
-				} else if game.levelOneEnemyList[i].direction == "down" &&
-					game.levelOneEnemyList[i].yLoc < 425 {
-					game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
-					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-				} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 425 {
-					game.levelOneEnemyList[i].direction = "right"
-					game.levelOneEnemyList[i].dy = 0
-				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 425 &&
-					game.levelOneEnemyList[i].xLoc < 425 {
-					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
-					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 425 &&
-					game.levelOneEnemyList[i].xLoc >= 425 {
-					game.levelOneEnemyList[i].direction = "up"
-					game.levelOneEnemyList[i].dx = 0
-				} else if game.levelOneEnemyList[i].direction == "up" && game.levelOneEnemyList[i].xLoc >= 425 &&
-					game.levelOneEnemyList[i].yLoc > 285 {
-					game.levelOneEnemyList[i].dy = -personEnemyMovementSpeed
-					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-				} else if game.levelOneEnemyList[i].direction == "up" && game.levelOneEnemyList[i].yLoc <= 285 {
-					game.levelOneEnemyList[i].direction = "left"
-					game.levelOneEnemyList[i].dy = 0
+			} else if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >= 150 ||
+				math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) >= 150 &&
+					game.levelOneEnemyList[i].inPlayerProximity == false {
+
+				if i == 0 {
+					if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc < 500 {
+						game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
+						game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 500 {
+						game.levelOneEnemyList[i].direction = "up"
+						game.levelOneEnemyList[i].dy = 0
+					} else if game.levelOneEnemyList[i].direction == "up" &&
+						game.levelOneEnemyList[i].yLoc > 40 {
+						game.levelOneEnemyList[i].dy = -personEnemyMovementSpeed
+						game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					} else if game.levelOneEnemyList[i].direction == "up" &&
+						game.levelOneEnemyList[i].yLoc <= 40 {
+						game.levelOneEnemyList[i].direction = "down"
+						game.levelOneEnemyList[i].dy = 0
+					}
+				} else if i == 1 {
+					// personEnemy2 moves around in a square
+					if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].yLoc <= 285 &&
+						game.levelOneEnemyList[i].xLoc <= 425 && game.levelOneEnemyList[i].xLoc > 285 {
+						game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+						game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					} else if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].yLoc <= 285 &&
+						game.levelOneEnemyList[i].xLoc <= 285 {
+						game.levelOneEnemyList[i].direction = "down"
+						game.levelOneEnemyList[i].dx = 0
+					} else if game.levelOneEnemyList[i].direction == "down" &&
+						game.levelOneEnemyList[i].yLoc < 425 {
+						game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
+						game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 425 {
+						game.levelOneEnemyList[i].direction = "right"
+						game.levelOneEnemyList[i].dy = 0
+					} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 425 &&
+						game.levelOneEnemyList[i].xLoc < 425 {
+						game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+						game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 425 &&
+						game.levelOneEnemyList[i].xLoc >= 425 {
+						game.levelOneEnemyList[i].direction = "up"
+						game.levelOneEnemyList[i].dx = 0
+					} else if game.levelOneEnemyList[i].direction == "up" && game.levelOneEnemyList[i].xLoc >= 425 &&
+						game.levelOneEnemyList[i].yLoc > 285 {
+						game.levelOneEnemyList[i].dy = -personEnemyMovementSpeed
+						game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					} else if game.levelOneEnemyList[i].direction == "up" && game.levelOneEnemyList[i].yLoc <= 285 {
+						game.levelOneEnemyList[i].direction = "left"
+						game.levelOneEnemyList[i].dy = 0
+					}
+				} else if i == 2 {
+					//monsterEnemy1 moves back and forth left and right at the top and chases if in certain proximity
+					if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc < 600 {
+						game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+						game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc >= 600 {
+						game.levelOneEnemyList[i].direction = "left"
+						game.levelOneEnemyList[i].dx = 0
+					} else if game.levelOneEnemyList[i].direction == "left" &&
+						game.levelOneEnemyList[i].xLoc > 300 {
+						game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+						game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					} else if game.levelOneEnemyList[i].direction == "left" &&
+						game.levelOneEnemyList[i].xLoc <= 300 {
+						game.levelOneEnemyList[i].direction = "right"
+						game.levelOneEnemyList[i].dx = 0
+					}
+				} else if i == 3 {
+					//monsterEnemy2 moves back and forth left and right at the bottom and chases if in certain proximity
+					if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc > 100 {
+						game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+						game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					} else if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc <= 100 {
+						game.levelOneEnemyList[i].direction = "right"
+						game.levelOneEnemyList[i].dx = 0
+					} else if game.levelOneEnemyList[i].direction == "right" &&
+						game.levelOneEnemyList[i].xLoc < 700 {
+						game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+						game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+					} else if game.levelOneEnemyList[i].direction == "right" &&
+						game.levelOneEnemyList[i].xLoc >= 700 {
+						game.levelOneEnemyList[i].direction = "left"
+						game.levelOneEnemyList[i].dx = 0
+					}
 				}
-			} else if i == 2 {
-				//monsterEnemy1 moves back and forth left and right at the top and chases if in certain proximity
-				if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc < 600 {
-					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+			} else {
+				//enemy is to the left and above player
+				game.levelOneEnemyList[i].inPlayerProximity = true
+				if game.levelOneEnemyList[i].xLoc <= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
+					game.levelOneEnemyList[i].dx = 1
+					game.levelOneEnemyList[i].dy = 1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "right"
+					} else {
+						game.levelOneEnemyList[i].direction = "down"
+					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc >= 600 {
-					game.levelOneEnemyList[i].direction = "left"
-					game.levelOneEnemyList[i].dx = 0
-				} else if game.levelOneEnemyList[i].direction == "left" &&
-					game.levelOneEnemyList[i].xLoc > 300 {
-					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
+					game.levelOneEnemyList[i].dx = -1
+					game.levelOneEnemyList[i].dy = 1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "left"
+					} else {
+						game.levelOneEnemyList[i].direction = "down"
+					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "left" &&
-					game.levelOneEnemyList[i].xLoc <= 300 {
-					game.levelOneEnemyList[i].direction = "right"
-					game.levelOneEnemyList[i].dx = 0
-				}
-			} else if i == 3 {
-				//monsterEnemy2 moves back and forth left and right at the bottom and chases if in certain proximity
-				if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc > 100 {
-					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].xLoc <= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
+					game.levelOneEnemyList[i].dx = 1
+					game.levelOneEnemyList[i].dy = -1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "right"
+					} else {
+						game.levelOneEnemyList[i].direction = "up"
+					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc <= 100 {
-					game.levelOneEnemyList[i].direction = "right"
-					game.levelOneEnemyList[i].dx = 0
-				} else if game.levelOneEnemyList[i].direction == "right" &&
-					game.levelOneEnemyList[i].xLoc < 700 {
-					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
+					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
+					game.levelOneEnemyList[i].dx = -1
+					game.levelOneEnemyList[i].dy = -1
+					if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >
+						math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) {
+						game.levelOneEnemyList[i].direction = "left"
+					} else {
+						game.levelOneEnemyList[i].direction = "up"
+					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "right" &&
-					game.levelOneEnemyList[i].xLoc >= 700 {
-					game.levelOneEnemyList[i].direction = "left"
-					game.levelOneEnemyList[i].dx = 0
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
 				}
 			}
 		}
@@ -492,19 +607,18 @@ func (game *Game) Update() error {
 	} else {
 		game.gameOver = false
 	}
-	if len(game.levelOneEnemyList) == 4 {
-		for i := 0; i < len(game.levelOneEnemyList); i++ {
-		}
-	}
+
 	if game.levelOneIsActive == true && game.gameOver == false {
 		game.spawnLevel1Enemies()
 		game.movementLevel1Enemies()
 		game.changeTankDirection()
 		game.changeTankTopperDirection()
-		game.shootFireball()
+		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
-		fmt.Println(game.score)
+
+		fmt.Println(math.Abs(float64(game.levelOneEnemyList[0].xLoc - game.playerSprite.xLoc)))
+		fmt.Println(math.Abs(float64(game.levelOneEnemyList[0].yLoc - game.playerSprite.yLoc)))
 
 	} else if game.levelTwoIsActive == true && game.gameOver == false {
 
@@ -516,7 +630,7 @@ func (game *Game) Update() error {
 		game.spawnLevel1Enemies()
 		game.changeTankDirection()
 		game.changeTankTopperDirection()
-		game.shootFireball()
+		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
 	}
