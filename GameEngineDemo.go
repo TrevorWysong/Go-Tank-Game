@@ -19,20 +19,22 @@ const (
 )
 
 type Sprite struct {
-	upPict            *ebiten.Image
-	downPict          *ebiten.Image
-	leftPict          *ebiten.Image
-	rightPict         *ebiten.Image
-	xLoc              int
-	yLoc              int
-	dx                int
-	dy                int
-	width             float64
-	height            float64
-	collision         bool
-	direction         string
-	health            int
-	inPlayerProximity bool
+	upPict              *ebiten.Image
+	downPict            *ebiten.Image
+	leftPict            *ebiten.Image
+	rightPict           *ebiten.Image
+	xLoc                int
+	yLoc                int
+	dx                  int
+	dy                  int
+	width               float64
+	height              float64
+	collision           bool
+	direction           string
+	health              int
+	inPlayerProximity   bool
+	projectileHold      bool
+	enemyProjectileList []Sprite
 }
 
 type Game struct {
@@ -66,14 +68,12 @@ type Game struct {
 	levelOneEnemyList          []Sprite
 	levelTwoEnemyList          []Sprite
 	levelThreeEnemyList        []Sprite
-	projectileHold             bool
 	levelOneIsActive           bool
 	levelTwoIsActive           bool
 	levelThreeIsActive         bool
 	spawnedLevel1Enemies       bool
 	spawnedLevel2Enemies       bool
 	spawnedLevel3Enemies       bool
-	enemyCanShoot              bool //to prevent enemies from shooting the instant the game starts
 	gameOver                   bool
 }
 
@@ -137,11 +137,11 @@ func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, pl
 }
 
 func (game *Game) playerShootFireball() []Sprite {
-	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.projectileHold == false {
-		game.projectileHold = true
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.playerSprite.projectileHold == false {
+		game.playerSprite.projectileHold = true
 		go func() {
 			<-time.After(500 * time.Millisecond)
-			game.projectileHold = false
+			game.playerSprite.projectileHold = false
 		}()
 		game.projectileAndWallCollision = false
 		tempFireball := game.fireball
@@ -179,6 +179,53 @@ func (game *Game) playerShootFireball() []Sprite {
 		}
 	}
 	return game.projectileList
+}
+
+func (game *Game) enemyShootFireball(enemySprite Sprite) ([]Sprite, bool) {
+	if enemySprite.projectileHold == false {
+
+		enemySprite.projectileHold = true
+		go func() {
+			<-time.After(2000 * time.Millisecond)
+			enemySprite.projectileHold = false
+		}()
+		game.projectileAndWallCollision = false
+
+		tempFireball := game.fireball
+
+		if enemySprite.direction == "up" {
+			tempFireball.xLoc = enemySprite.xLoc + 20
+			tempFireball.yLoc = enemySprite.yLoc - 18
+			tempFireball.dx = 0
+			tempFireball.dy = -10
+			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+		} else if enemySprite.direction == "down" {
+			tempFireball.xLoc = enemySprite.xLoc + 20
+			tempFireball.yLoc = enemySprite.yLoc + 55
+			tempFireball.dx = 0
+			tempFireball.dy = 10
+			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+		} else if enemySprite.direction == "left" {
+			tempFireball.xLoc = enemySprite.xLoc - 15
+			tempFireball.yLoc = enemySprite.yLoc + 18
+			tempFireball.dx = -10
+			tempFireball.dy = 0
+			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+		} else if enemySprite.direction == "right" {
+			tempFireball.xLoc = enemySprite.xLoc + 55
+			tempFireball.yLoc = enemySprite.yLoc + 18
+			tempFireball.dx = 10
+			tempFireball.dy = 0
+			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+		} else {
+			tempFireball.xLoc = enemySprite.xLoc + 20
+			tempFireball.yLoc = enemySprite.yLoc - 18
+			tempFireball.dx = 0
+			tempFireball.dy = -10
+			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+		}
+	}
+	return enemySprite.enemyProjectileList, enemySprite.projectileHold
 }
 
 func (game *Game) changeTankDirection() {
@@ -308,9 +355,13 @@ func (game *Game) movementLevel1Enemies() {
 						game.levelOneEnemyList[i].direction = "right"
 					} else {
 						game.levelOneEnemyList[i].direction = "down"
+						game.enemyShootFireball(game.levelOneEnemyList[i])
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList, game.levelOneEnemyList[i].projectileHold =
+						game.enemyShootFireball(game.levelOneEnemyList[i])
+
 				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
 					//enemy to the right and above player
@@ -454,6 +505,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList, game.levelOneEnemyList[i].projectileHold =
+						game.enemyShootFireball(game.levelOneEnemyList[i])
 				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
 					game.levelOneEnemyList[i].dx = -1
@@ -659,6 +712,21 @@ func (game Game) Draw(screen *ebiten.Image) {
 						screen.DrawImage(game.levelOneEnemyList[i].downPict, &game.drawOps)
 					} else {
 						screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
+					}
+				}
+			}
+		}
+
+		if len(game.levelOneEnemyList) > 0 {
+			for i := 0; i < len(game.levelOneEnemyList); i++ {
+				if len(game.levelOneEnemyList[i].enemyProjectileList) > 0 {
+					for j := 0; j < len(game.levelOneEnemyList[i].enemyProjectileList); j++ {
+						if game.levelOneEnemyList[i].enemyProjectileList[j].collision == false {
+							game.drawOps.GeoM.Reset()
+							game.drawOps.GeoM.Translate(float64(game.levelOneEnemyList[i].enemyProjectileList[j].xLoc),
+								float64(game.levelOneEnemyList[i].enemyProjectileList[j].yLoc))
+							screen.DrawImage(game.levelOneEnemyList[i].enemyProjectileList[j].upPict, &game.drawOps)
+						}
 					}
 				}
 			}
