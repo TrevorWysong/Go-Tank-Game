@@ -244,8 +244,8 @@ func (game *Game) spawnLevel1Enemies() {
 		personEnemy2.yLoc = 285
 		monsterEnemy1.xLoc = 300
 		monsterEnemy1.yLoc = 85
-		monsterEnemy2.xLoc = 580
-		monsterEnemy2.yLoc = 590
+		monsterEnemy2.xLoc = 650
+		monsterEnemy2.yLoc = 600
 
 		game.levelOneEnemyList = append(game.levelOneEnemyList, personEnemy1)
 		game.levelOneEnemyList = append(game.levelOneEnemyList, personEnemy2)
@@ -287,17 +287,17 @@ func (game *Game) movementLevel1Enemies() {
 					game.levelOneEnemyList[i].direction = "down"
 					game.levelOneEnemyList[i].dx = 0
 				} else if game.levelOneEnemyList[i].direction == "down" &&
-					game.levelOneEnemyList[i].yLoc < 450 {
+					game.levelOneEnemyList[i].yLoc < 425 {
 					game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-				} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 450 {
+				} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 425 {
 					game.levelOneEnemyList[i].direction = "right"
 					game.levelOneEnemyList[i].dy = 0
-				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 450 &&
+				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 425 &&
 					game.levelOneEnemyList[i].xLoc < 425 {
 					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
-				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 450 &&
+				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 425 &&
 					game.levelOneEnemyList[i].xLoc >= 425 {
 					game.levelOneEnemyList[i].direction = "up"
 					game.levelOneEnemyList[i].dx = 0
@@ -310,7 +310,7 @@ func (game *Game) movementLevel1Enemies() {
 					game.levelOneEnemyList[i].dy = 0
 				}
 			} else if i == 2 {
-				//monsterEnemy1 moves back and forth left and right at the top and chases if in certain distance
+				//monsterEnemy1 moves back and forth left and right at the top and chases if in certain proximity
 				if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc < 600 {
 					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
@@ -327,7 +327,7 @@ func (game *Game) movementLevel1Enemies() {
 					game.levelOneEnemyList[i].dx = 0
 				}
 			} else if i == 3 {
-				//monsterEnemy2 moves back and forth left and right at the bottom and chases if in certain distance
+				//monsterEnemy2 moves back and forth left and right at the bottom and chases if in certain proximity
 				if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc > 100 {
 					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
@@ -335,11 +335,11 @@ func (game *Game) movementLevel1Enemies() {
 					game.levelOneEnemyList[i].direction = "right"
 					game.levelOneEnemyList[i].dx = 0
 				} else if game.levelOneEnemyList[i].direction == "right" &&
-					game.levelOneEnemyList[i].xLoc < 800 {
+					game.levelOneEnemyList[i].xLoc < 700 {
 					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 				} else if game.levelOneEnemyList[i].direction == "right" &&
-					game.levelOneEnemyList[i].xLoc >= 800 {
+					game.levelOneEnemyList[i].xLoc >= 700 {
 					game.levelOneEnemyList[i].direction = "left"
 					game.levelOneEnemyList[i].dx = 0
 				}
