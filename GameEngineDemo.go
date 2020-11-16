@@ -122,6 +122,26 @@ func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, e
 	return false, false, anyEnemy.health, additionalScore
 }
 
+func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, playerWidth int) (int, int, int) {
+	if player.xLoc < anyEnemy.xLoc+enemyWidth &&
+		player.xLoc+playerWidth > anyEnemy.xLoc &&
+		player.yLoc < anyEnemy.yLoc+enemyWidth &&
+		player.yLoc+playerWidth > anyEnemy.yLoc {
+		player.xLoc, player.yLoc = 190, ScreenHeight*0.72
+		death := 1
+		return player.xLoc, player.yLoc, death
+	} else if player.xLoc < anyEnemy.xLoc+enemyWidth &&
+		player.xLoc+playerWidth > anyEnemy.xLoc &&
+		player.yLoc < anyEnemy.yLoc+enemyWidth &&
+		player.yLoc+playerWidth > anyEnemy.yLoc {
+		fmt.Println("here")
+		death := 1
+		return player.xLoc, player.yLoc, death
+	}
+	death := 0
+	return player.xLoc, player.yLoc, death
+}
+
 func (game *Game) shootFireball() []Sprite {
 	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.projectileHold == false {
 		game.projectileHold = true
@@ -416,6 +436,19 @@ func (game *Game) manageLevel1CollisionDetection() {
 			}
 		}
 	}
+
+	if len(game.levelOneEnemyList) > 0 {
+		for i := 0; i < len(game.levelOneEnemyList); i++ {
+			if game.levelOneEnemyList[i].collision == false {
+				enemyWidth, _ := game.levelOneEnemyList[i].leftPict.Size()
+				playerWidth, _ := game.playerSprite.upPict.Size()
+				death := 0
+				game.playerSprite.xLoc, game.playerSprite.yLoc, death = playerCollisionWithEnemy(game.levelOneEnemyList[i], game.playerSprite, enemyWidth, playerWidth)
+				game.deathCounter += death
+			}
+		}
+	}
+
 	if len(game.projectileList) > 0 && len(game.levelOneEnemyList) > 0 {
 		for i := 0; i < len(game.projectileList); i++ {
 			for j := 0; j < len(game.levelOneEnemyList); j++ {
