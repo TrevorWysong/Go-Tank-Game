@@ -122,24 +122,16 @@ func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, e
 	return false, false, anyEnemy.health, additionalScore
 }
 
-func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, playerWidth int) (int, int, int) {
+func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, playerWidth int) int {
 	if player.xLoc < anyEnemy.xLoc+enemyWidth &&
 		player.xLoc+playerWidth > anyEnemy.xLoc &&
 		player.yLoc < anyEnemy.yLoc+enemyWidth &&
 		player.yLoc+playerWidth > anyEnemy.yLoc {
-		player.xLoc, player.yLoc = 190, ScreenHeight*0.72
 		death := 1
-		return player.xLoc, player.yLoc, death
-	} else if player.xLoc < anyEnemy.xLoc+enemyWidth &&
-		player.xLoc+playerWidth > anyEnemy.xLoc &&
-		player.yLoc < anyEnemy.yLoc+enemyWidth &&
-		player.yLoc+playerWidth > anyEnemy.yLoc {
-		fmt.Println("here")
-		death := 1
-		return player.xLoc, player.yLoc, death
+		return death
 	}
 	death := 0
-	return player.xLoc, player.yLoc, death
+	return death
 }
 
 func (game *Game) shootFireball() []Sprite {
@@ -442,9 +434,11 @@ func (game *Game) manageLevel1CollisionDetection() {
 			if game.levelOneEnemyList[i].collision == false {
 				enemyWidth, _ := game.levelOneEnemyList[i].leftPict.Size()
 				playerWidth, _ := game.playerSprite.upPict.Size()
-				death := 0
-				game.playerSprite.xLoc, game.playerSprite.yLoc, death = playerCollisionWithEnemy(game.levelOneEnemyList[i], game.playerSprite, enemyWidth, playerWidth)
-				game.deathCounter += death
+				death := playerCollisionWithEnemy(game.levelOneEnemyList[i], game.playerSprite, enemyWidth, playerWidth)
+				if death == 1 {
+					game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+					game.deathCounter += death
+				}
 			}
 		}
 	}
