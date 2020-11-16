@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -98,6 +99,27 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 		return true
 	}
 	return false
+}
+
+func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, enemyWidth int, projectileWidth int) (bool, bool, int, int) {
+	if (anyProjectileSprite.xLoc < anyEnemy.xLoc+enemyWidth &&
+		anyProjectileSprite.xLoc+projectileWidth > anyEnemy.xLoc &&
+		anyProjectileSprite.yLoc < anyEnemy.yLoc+enemyWidth &&
+		anyProjectileSprite.yLoc+projectileWidth > anyEnemy.yLoc) && (anyEnemy.health == 1) {
+		anyEnemy.health -= 1
+		additionalScore := 200
+		return true, true, anyEnemy.health, additionalScore
+	} else if (anyProjectileSprite.xLoc < anyEnemy.xLoc+enemyWidth &&
+		anyProjectileSprite.xLoc+projectileWidth > anyEnemy.xLoc &&
+		anyProjectileSprite.yLoc < anyEnemy.yLoc+enemyWidth &&
+		anyProjectileSprite.yLoc+projectileWidth > anyEnemy.yLoc) && (anyEnemy.health == 2) {
+		fmt.Println("here")
+		anyEnemy.health -= 1
+		additionalScore := 100
+		return false, true, anyEnemy.health, additionalScore
+	}
+	additionalScore := 0
+	return false, false, anyEnemy.health, additionalScore
 }
 
 func (game *Game) shootFireball() []Sprite {
@@ -229,7 +251,6 @@ func (game *Game) spawnLevel1Enemies() {
 		personEnemy2 := game.personEnemy
 		monsterEnemy1 := game.monsterEnemy
 		monsterEnemy2 := game.monsterEnemy
-
 		personEnemy1.direction = "down"
 		personEnemy2.direction = "left"
 		monsterEnemy1.direction = "right"
@@ -395,6 +416,19 @@ func (game *Game) manageLevel1CollisionDetection() {
 			}
 		}
 	}
+	if len(game.projectileList) > 0 && len(game.levelOneEnemyList) > 0 {
+		for i := 0; i < len(game.projectileList); i++ {
+			for j := 0; j < len(game.levelOneEnemyList); j++ {
+				enemyWidth, _ := game.levelOneEnemyList[j].upPict.Size()
+				if game.levelOneEnemyList[j].collision == false && game.projectileList[i].collision == false {
+					additionalScore := 0
+					game.levelOneEnemyList[j].collision, game.projectileList[i].collision, game.levelOneEnemyList[j].health, additionalScore =
+						projectileCollisionWithEnemy(game.levelOneEnemyList[j], game.projectileList[i], enemyWidth, 20)
+					game.score += additionalScore
+				}
+			}
+		}
+	}
 }
 
 func (game *Game) checkLevel() {
@@ -433,7 +467,6 @@ func (game *Game) Update() error {
 	}
 	if len(game.levelOneEnemyList) == 4 {
 		for i := 0; i < len(game.levelOneEnemyList); i++ {
-			fmt.Println(game.levelOneEnemyList[i].collision)
 		}
 	}
 	if game.levelOneIsActive == true && game.gameOver == false {
@@ -444,6 +477,7 @@ func (game *Game) Update() error {
 		game.shootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
+		fmt.Println(game.score)
 
 	} else if game.levelTwoIsActive == true && game.gameOver == false {
 
