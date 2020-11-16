@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -27,6 +28,8 @@ type Sprite struct {
 	width     float64
 	height    float64
 	collision bool
+	direction string
+	health    int
 }
 
 type Game struct {
@@ -57,10 +60,17 @@ type Game struct {
 	deathCounter               int
 	score                      int
 	projectileList             []Sprite
+	levelOneEnemyList          []Sprite
+	levelTwoEnemyList          []Sprite
+	levelThreeEnemyList        []Sprite
 	projectileHold             bool
 	levelOneIsActive           bool
 	levelTwoIsActive           bool
 	levelThreeIsActive         bool
+	spawnedLevel1Enemies       bool
+	spawnedLevel2Enemies       bool
+	spawnedLevel3Enemies       bool
+	enemyCanShoot              bool //to prevent enemies from shooting the instant the game starts
 	gameOver                   bool
 }
 
@@ -214,6 +224,128 @@ func (game *Game) manageTankTopperOffset() {
 }
 
 func (game *Game) spawnLevel1Enemies() {
+	if game.spawnedLevel1Enemies == false {
+		personEnemy1 := game.personEnemy
+		personEnemy2 := game.personEnemy
+		monsterEnemy1 := game.monsterEnemy
+		monsterEnemy2 := game.monsterEnemy
+
+		personEnemy1.direction = "down"
+		personEnemy2.direction = "left"
+		monsterEnemy1.direction = "right"
+		monsterEnemy2.direction = "left"
+		personEnemy1.health = 1
+		personEnemy2.health = 1
+		monsterEnemy1.health = 2
+		monsterEnemy2.health = 2
+		personEnemy1.xLoc = 90
+		personEnemy1.yLoc = 40
+		personEnemy2.xLoc = 425
+		personEnemy2.yLoc = 285
+		monsterEnemy1.xLoc = 300
+		monsterEnemy1.yLoc = 85
+		monsterEnemy2.xLoc = 580
+		monsterEnemy2.yLoc = 590
+
+		game.levelOneEnemyList = append(game.levelOneEnemyList, personEnemy1)
+		game.levelOneEnemyList = append(game.levelOneEnemyList, personEnemy2)
+		game.levelOneEnemyList = append(game.levelOneEnemyList, monsterEnemy1)
+		game.levelOneEnemyList = append(game.levelOneEnemyList, monsterEnemy2)
+	}
+	game.spawnedLevel1Enemies = true
+}
+
+func (game *Game) movementLevel1Enemies() {
+	personEnemyMovementSpeed := 1
+	if len(game.levelOneEnemyList) == 4 {
+		for i := 0; i < len(game.levelOneEnemyList); i++ {
+			//personEnemy1 moves up and down along left side
+			if i == 0 {
+				if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc < 500 {
+					game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 500 {
+					game.levelOneEnemyList[i].direction = "up"
+					game.levelOneEnemyList[i].dy = 0
+				} else if game.levelOneEnemyList[i].direction == "up" &&
+					game.levelOneEnemyList[i].yLoc > 40 {
+					game.levelOneEnemyList[i].dy = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].direction == "up" &&
+					game.levelOneEnemyList[i].yLoc <= 40 {
+					game.levelOneEnemyList[i].direction = "down"
+					game.levelOneEnemyList[i].dy = 0
+				}
+			} else if i == 1 {
+				// personEnemy2 moves around in a square
+				if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].yLoc <= 285 &&
+					game.levelOneEnemyList[i].xLoc <= 425 && game.levelOneEnemyList[i].xLoc > 285 {
+					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+				} else if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].yLoc <= 285 &&
+					game.levelOneEnemyList[i].xLoc <= 285 {
+					game.levelOneEnemyList[i].direction = "down"
+					game.levelOneEnemyList[i].dx = 0
+				} else if game.levelOneEnemyList[i].direction == "down" &&
+					game.levelOneEnemyList[i].yLoc < 450 {
+					game.levelOneEnemyList[i].dy = personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].direction == "down" && game.levelOneEnemyList[i].yLoc >= 450 {
+					game.levelOneEnemyList[i].direction = "right"
+					game.levelOneEnemyList[i].dy = 0
+				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 450 &&
+					game.levelOneEnemyList[i].xLoc < 425 {
+					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].yLoc >= 450 &&
+					game.levelOneEnemyList[i].xLoc >= 425 {
+					game.levelOneEnemyList[i].direction = "up"
+					game.levelOneEnemyList[i].dx = 0
+				} else if game.levelOneEnemyList[i].direction == "up" && game.levelOneEnemyList[i].xLoc >= 425 &&
+					game.levelOneEnemyList[i].yLoc > 285 {
+					game.levelOneEnemyList[i].dy = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+				} else if game.levelOneEnemyList[i].direction == "up" && game.levelOneEnemyList[i].yLoc <= 285 {
+					game.levelOneEnemyList[i].direction = "left"
+					game.levelOneEnemyList[i].dy = 0
+				}
+			} else if i == 2 {
+				//monsterEnemy1 moves back and forth left and right at the top and chases if in certain distance
+				if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc < 600 {
+					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+				} else if game.levelOneEnemyList[i].direction == "right" && game.levelOneEnemyList[i].xLoc >= 600 {
+					game.levelOneEnemyList[i].direction = "left"
+					game.levelOneEnemyList[i].dx = 0
+				} else if game.levelOneEnemyList[i].direction == "left" &&
+					game.levelOneEnemyList[i].xLoc > 300 {
+					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+				} else if game.levelOneEnemyList[i].direction == "left" &&
+					game.levelOneEnemyList[i].xLoc <= 300 {
+					game.levelOneEnemyList[i].direction = "right"
+					game.levelOneEnemyList[i].dx = 0
+				}
+			} else if i == 3 {
+				//monsterEnemy2 moves back and forth left and right at the bottom and chases if in certain distance
+				if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc > 100 {
+					game.levelOneEnemyList[i].dx = -personEnemyMovementSpeed
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+				} else if game.levelOneEnemyList[i].direction == "left" && game.levelOneEnemyList[i].xLoc <= 100 {
+					game.levelOneEnemyList[i].direction = "right"
+					game.levelOneEnemyList[i].dx = 0
+				} else if game.levelOneEnemyList[i].direction == "right" &&
+					game.levelOneEnemyList[i].xLoc < 800 {
+					game.levelOneEnemyList[i].dx = personEnemyMovementSpeed
+					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
+				} else if game.levelOneEnemyList[i].direction == "right" &&
+					game.levelOneEnemyList[i].xLoc >= 800 {
+					game.levelOneEnemyList[i].direction = "left"
+					game.levelOneEnemyList[i].dx = 0
+				}
+			}
+		}
+	}
 
 }
 
@@ -230,6 +362,30 @@ func (game *Game) manageLevel1CollisionDetection() {
 		game.playerAndWallCollision = false
 		game.deathCounter += 1
 	}
+
+	if len(game.levelOneEnemyList) > 0 {
+		for i := 0; i < len(game.levelOneEnemyList); i++ {
+			if game.levelOneEnemyList[i].collision == false {
+				if game.levelOneEnemyList[i].direction == "left" {
+					spriteWidth, _ := game.levelOneEnemyList[i].leftPict.Size()
+					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+				} else if game.levelOneEnemyList[i].direction == "right" {
+					spriteWidth, _ := game.levelOneEnemyList[i].rightPict.Size()
+					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+				} else if game.levelOneEnemyList[i].direction == "up" {
+					spriteWidth, _ := game.levelOneEnemyList[i].upPict.Size()
+					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+				} else if game.levelOneEnemyList[i].direction == "down" {
+					spriteWidth, _ := game.levelOneEnemyList[i].downPict.Size()
+					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+				}
+			} else {
+				game.levelOneEnemyList[i].dx = 0
+				game.levelOneEnemyList[i].dy = 0
+			}
+		}
+	}
+
 	if len(game.projectileList) > 0 {
 		for i := 0; i < len(game.projectileList); i++ {
 			if game.projectileList[i].collision == false {
@@ -261,28 +417,37 @@ func (game *Game) checkLevel() {
 			game.levelThreeIsActive = false
 		}
 	} else {
-		game.levelOneIsActive = false
+		game.levelOneIsActive = true
 		game.levelTwoIsActive = false
 		game.levelThreeIsActive = false
 	}
 }
 
 func (game *Game) Update() error {
+	game.checkLevel()
+
 	if game.deathCounter >= 3 {
 		game.gameOver = true
 	} else {
 		game.gameOver = false
 	}
-	if game.levelOneIsActive == true {
+	if len(game.levelOneEnemyList) == 4 {
+		for i := 0; i < len(game.levelOneEnemyList); i++ {
+			fmt.Println(game.levelOneEnemyList[i].collision)
+		}
+	}
+	if game.levelOneIsActive == true && game.gameOver == false {
 		game.spawnLevel1Enemies()
+		game.movementLevel1Enemies()
 		game.changeTankDirection()
 		game.changeTankTopperDirection()
 		game.shootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
-	} else if game.levelTwoIsActive == true {
 
-	} else if game.levelThreeIsActive == true {
+	} else if game.levelTwoIsActive == true && game.gameOver == false {
+
+	} else if game.levelThreeIsActive == true && game.gameOver == false {
 
 	} else if game.gameOver == true {
 
@@ -303,6 +468,26 @@ func (game Game) Draw(screen *ebiten.Image) {
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
 		screen.DrawImage(game.firstMap.upPict, &game.drawOps)
+
+		if len(game.levelOneEnemyList) > 0 {
+			for i := 0; i < len(game.levelOneEnemyList); i++ {
+				if game.levelOneEnemyList[i].collision == false {
+					game.drawOps.GeoM.Reset()
+					game.drawOps.GeoM.Translate(float64(game.levelOneEnemyList[i].xLoc), float64(game.levelOneEnemyList[i].yLoc))
+					if game.levelOneEnemyList[i].direction == "left" {
+						screen.DrawImage(game.levelOneEnemyList[i].leftPict, &game.drawOps)
+					} else if game.levelOneEnemyList[i].direction == "right" {
+						screen.DrawImage(game.levelOneEnemyList[i].rightPict, &game.drawOps)
+					} else if game.levelOneEnemyList[i].direction == "up" {
+						screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
+					} else if game.levelOneEnemyList[i].direction == "down" {
+						screen.DrawImage(game.levelOneEnemyList[i].downPict, &game.drawOps)
+					} else {
+						screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
+					}
+				}
+			}
+		}
 
 		if len(game.projectileList) > 0 {
 			for i := 0; i < len(game.projectileList); i++ {
