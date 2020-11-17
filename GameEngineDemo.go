@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -103,6 +102,17 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 	return false
 }
 
+func wallCollisionCheckSecondLevel(anySprite Sprite, spriteWidth int) bool {
+	boundaryWidth := 25
+	if anySprite.xLoc < 0+boundaryWidth || anySprite.xLoc > ScreenWidth-boundaryWidth-spriteWidth ||
+		anySprite.yLoc > ScreenHeight-boundaryWidth-spriteWidth || anySprite.yLoc < 0+boundaryWidth ||
+		anySprite.xLoc > 200-spriteWidth && anySprite.xLoc < 325 && anySprite.yLoc < 525 ||
+		anySprite.xLoc > 425-spriteWidth && anySprite.xLoc < 525 && anySprite.yLoc > 200 {
+		return true
+	}
+	return false
+}
+
 func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, enemyWidth int, projectileWidth int) (bool, bool, int, int) {
 	if (anyProjectileSprite.xLoc < anyEnemy.xLoc+enemyWidth &&
 		anyProjectileSprite.xLoc+projectileWidth > anyEnemy.xLoc &&
@@ -191,50 +201,145 @@ func (game *Game) playerShootFireball() []Sprite {
 }
 
 func (game *Game) enemyShootFireball(i int) []Sprite {
-	if game.levelOneEnemyList[i].projectileHold == false && game.levelOneEnemyList[i].collision == false {
+	if game.levelOneIsActive {
+		if game.levelOneEnemyList[i].projectileHold == false && game.levelOneEnemyList[i].collision == false {
+			game.levelOneEnemyList[i].projectileHold = true
+			go func() {
+				<-time.After(3000 * time.Millisecond)
+				game.levelOneEnemyList[i].projectileHold = false
+			}()
+			game.projectileAndWallCollision = false
 
-		game.levelOneEnemyList[i].projectileHold = true
-		go func() {
-			<-time.After(3000 * time.Millisecond)
-			game.levelOneEnemyList[i].projectileHold = false
-		}()
-		game.projectileAndWallCollision = false
+			tempFireball := game.fireball
 
-		tempFireball := game.fireball
-
-		if game.levelOneEnemyList[i].direction == "up" {
-			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
-			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc - 18
-			tempFireball.dx = 0
-			tempFireball.dy = -3
-			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
-		} else if game.levelOneEnemyList[i].direction == "down" {
-			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
-			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 55
-			tempFireball.dx = 0
-			tempFireball.dy = 3
-			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
-		} else if game.levelOneEnemyList[i].direction == "left" {
-			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc - 15
-			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 18
-			tempFireball.dx = -3
-			tempFireball.dy = 0
-			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
-		} else if game.levelOneEnemyList[i].direction == "right" {
-			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 55
-			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 18
-			tempFireball.dx = 3
-			tempFireball.dy = 0
-			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
-		} else {
-			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
-			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc - 18
-			tempFireball.dx = 0
-			tempFireball.dy = -3
-			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+			if game.levelOneEnemyList[i].direction == "up" {
+				tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelOneEnemyList[i].yLoc - 18
+				tempFireball.dx = 0
+				tempFireball.dy = -3
+				game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelOneEnemyList[i].direction == "down" {
+				tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 55
+				tempFireball.dx = 0
+				tempFireball.dy = 3
+				game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelOneEnemyList[i].direction == "left" {
+				tempFireball.xLoc = game.levelOneEnemyList[i].xLoc - 15
+				tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 18
+				tempFireball.dx = -3
+				tempFireball.dy = 0
+				game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelOneEnemyList[i].direction == "right" {
+				tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 55
+				tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 18
+				tempFireball.dx = 3
+				tempFireball.dy = 0
+				game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+			} else {
+				tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelOneEnemyList[i].yLoc - 18
+				tempFireball.dx = 0
+				tempFireball.dy = -3
+				game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+			}
 		}
+		return game.levelOneEnemyList[i].enemyProjectileList
+
+	} else if game.levelTwoIsActive {
+		if game.levelTwoEnemyList[i].projectileHold == false && game.levelTwoEnemyList[i].collision == false {
+
+			game.levelTwoEnemyList[i].projectileHold = true
+			go func() {
+				<-time.After(3000 * time.Millisecond)
+				game.levelTwoEnemyList[i].projectileHold = false
+			}()
+			game.projectileAndWallCollision = false
+
+			tempFireball := game.fireball
+
+			if game.levelTwoEnemyList[i].direction == "up" {
+				tempFireball.xLoc = game.levelTwoEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelTwoEnemyList[i].yLoc - 18
+				tempFireball.dx = 0
+				tempFireball.dy = -3
+				game.levelTwoEnemyList[i].enemyProjectileList = append(game.levelTwoEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelTwoEnemyList[i].direction == "down" {
+				tempFireball.xLoc = game.levelTwoEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelTwoEnemyList[i].yLoc + 55
+				tempFireball.dx = 0
+				tempFireball.dy = 3
+				game.levelTwoEnemyList[i].enemyProjectileList = append(game.levelTwoEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelTwoEnemyList[i].direction == "left" {
+				tempFireball.xLoc = game.levelTwoEnemyList[i].xLoc - 15
+				tempFireball.yLoc = game.levelTwoEnemyList[i].yLoc + 18
+				tempFireball.dx = -3
+				tempFireball.dy = 0
+				game.levelTwoEnemyList[i].enemyProjectileList = append(game.levelTwoEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelTwoEnemyList[i].direction == "right" {
+				tempFireball.xLoc = game.levelTwoEnemyList[i].xLoc + 55
+				tempFireball.yLoc = game.levelTwoEnemyList[i].yLoc + 18
+				tempFireball.dx = 3
+				tempFireball.dy = 0
+				game.levelTwoEnemyList[i].enemyProjectileList = append(game.levelTwoEnemyList[i].enemyProjectileList, tempFireball)
+			} else {
+				tempFireball.xLoc = game.levelTwoEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelTwoEnemyList[i].yLoc - 18
+				tempFireball.dx = 0
+				tempFireball.dy = -3
+				game.levelTwoEnemyList[i].enemyProjectileList = append(game.levelTwoEnemyList[i].enemyProjectileList, tempFireball)
+			}
+		}
+		return game.levelTwoEnemyList[i].enemyProjectileList
+
+	} else if game.levelThreeIsActive {
+		if game.levelThreeEnemyList[i].projectileHold == false && game.levelThreeEnemyList[i].collision == false {
+
+			game.levelThreeEnemyList[i].projectileHold = true
+			go func() {
+				<-time.After(3000 * time.Millisecond)
+				game.levelThreeEnemyList[i].projectileHold = false
+			}()
+			game.projectileAndWallCollision = false
+
+			tempFireball := game.fireball
+
+			if game.levelThreeEnemyList[i].direction == "up" {
+				tempFireball.xLoc = game.levelThreeEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelThreeEnemyList[i].yLoc - 18
+				tempFireball.dx = 0
+				tempFireball.dy = -3
+				game.levelThreeEnemyList[i].enemyProjectileList = append(game.levelThreeEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelThreeEnemyList[i].direction == "down" {
+				tempFireball.xLoc = game.levelThreeEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelThreeEnemyList[i].yLoc + 55
+				tempFireball.dx = 0
+				tempFireball.dy = 3
+				game.levelThreeEnemyList[i].enemyProjectileList = append(game.levelThreeEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelThreeEnemyList[i].direction == "left" {
+				tempFireball.xLoc = game.levelThreeEnemyList[i].xLoc - 15
+				tempFireball.yLoc = game.levelThreeEnemyList[i].yLoc + 18
+				tempFireball.dx = -3
+				tempFireball.dy = 0
+				game.levelThreeEnemyList[i].enemyProjectileList = append(game.levelThreeEnemyList[i].enemyProjectileList, tempFireball)
+			} else if game.levelThreeEnemyList[i].direction == "right" {
+				tempFireball.xLoc = game.levelThreeEnemyList[i].xLoc + 55
+				tempFireball.yLoc = game.levelThreeEnemyList[i].yLoc + 18
+				tempFireball.dx = 3
+				tempFireball.dy = 0
+				game.levelThreeEnemyList[i].enemyProjectileList = append(game.levelThreeEnemyList[i].enemyProjectileList, tempFireball)
+			} else {
+				tempFireball.xLoc = game.levelThreeEnemyList[i].xLoc + 20
+				tempFireball.yLoc = game.levelThreeEnemyList[i].yLoc - 18
+				tempFireball.dx = 0
+				tempFireball.dy = -3
+				game.levelThreeEnemyList[i].enemyProjectileList = append(game.levelThreeEnemyList[i].enemyProjectileList, tempFireball)
+			}
+		}
+		return game.levelThreeEnemyList[i].enemyProjectileList
+	} else {
+		return game.levelOneEnemyList
 	}
-	return game.levelOneEnemyList[i].enemyProjectileList
 }
 
 func (game *Game) changeTankDirection() {
@@ -344,6 +449,37 @@ func (game *Game) spawnLevel1Enemies() {
 		game.levelOneEnemyList = append(game.levelOneEnemyList, monsterEnemy2)
 	}
 	game.spawnedLevel1Enemies = true
+}
+
+func (game *Game) spawnLevel2Enemies() {
+	if game.spawnedLevel2Enemies == false {
+		personEnemy1 := game.personEnemy
+		personEnemy2 := game.personEnemy
+		monsterEnemy1 := game.monsterEnemy
+		monsterEnemy2 := game.monsterEnemy
+		personEnemy1.direction = "left"
+		personEnemy2.direction = "up"
+		monsterEnemy1.direction = "up"
+		monsterEnemy2.direction = "left"
+		personEnemy1.health = 1
+		personEnemy2.health = 1
+		monsterEnemy1.health = 2
+		monsterEnemy2.health = 2
+		personEnemy1.xLoc = 365
+		personEnemy1.yLoc = 585
+		personEnemy2.xLoc = 665
+		personEnemy2.yLoc = 550
+		monsterEnemy1.xLoc = 80
+		monsterEnemy1.yLoc = 400
+		monsterEnemy2.xLoc = 650
+		monsterEnemy2.yLoc = 100
+
+		game.levelTwoEnemyList = append(game.levelTwoEnemyList, personEnemy1)
+		game.levelTwoEnemyList = append(game.levelTwoEnemyList, personEnemy2)
+		game.levelTwoEnemyList = append(game.levelTwoEnemyList, monsterEnemy1)
+		game.levelTwoEnemyList = append(game.levelTwoEnemyList, monsterEnemy2)
+	}
+	game.spawnedLevel2Enemies = true
 }
 
 func (game *Game) movementLevel1Enemies() {
@@ -567,7 +703,6 @@ func (game *Game) movementLevel1Enemies() {
 			}
 		}
 	}
-
 }
 
 func (game *Game) manageLevel1CollisionDetection() {
@@ -740,12 +875,17 @@ func (game *Game) Update() error {
 		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
-		fmt.Println(game.score)
-
 	} else if game.levelTwoIsActive == true && game.gameOver == false {
-
+		game.spawnLevel2Enemies()
+		game.changeTankDirection()
+		game.changeTankTopperDirection()
+		game.playerShootFireball()
+		game.manageTankTopperOffset()
 	} else if game.levelThreeIsActive == true && game.gameOver == false {
-
+		game.changeTankDirection()
+		game.changeTankTopperDirection()
+		game.playerShootFireball()
+		game.manageTankTopperOffset()
 	} else if game.gameOver == true {
 
 	} else {
@@ -762,51 +902,102 @@ func (game *Game) Update() error {
 func (game Game) Draw(screen *ebiten.Image) {
 	//screen.Fill(colornames.Chocolate)
 	if game.gameOver == false {
-		game.drawOps.GeoM.Reset()
-		game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
-		screen.DrawImage(game.firstMap.upPict, &game.drawOps)
+		if game.levelOneIsActive {
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
+			screen.DrawImage(game.firstMap.upPict, &game.drawOps)
 
-		if len(game.levelOneEnemyList) > 0 {
-			for i := 0; i < len(game.levelOneEnemyList); i++ {
-				if game.levelOneEnemyList[i].collision == false {
-					game.drawOps.GeoM.Reset()
-					game.drawOps.GeoM.Translate(float64(game.levelOneEnemyList[i].xLoc), float64(game.levelOneEnemyList[i].yLoc))
-					if game.levelOneEnemyList[i].direction == "left" {
-						screen.DrawImage(game.levelOneEnemyList[i].leftPict, &game.drawOps)
-					} else if game.levelOneEnemyList[i].direction == "right" {
-						screen.DrawImage(game.levelOneEnemyList[i].rightPict, &game.drawOps)
-					} else if game.levelOneEnemyList[i].direction == "up" {
-						screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
-					} else if game.levelOneEnemyList[i].direction == "down" {
-						screen.DrawImage(game.levelOneEnemyList[i].downPict, &game.drawOps)
-					} else {
-						screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
-					}
-				}
-			}
-		}
-
-		if len(game.levelOneEnemyList) > 0 {
-			for i := 0; i < len(game.levelOneEnemyList); i++ {
-				if len(game.levelOneEnemyList[i].enemyProjectileList) > 0 {
-					for j := 0; j < len(game.levelOneEnemyList[i].enemyProjectileList); j++ {
-						if game.levelOneEnemyList[i].enemyProjectileList[j].collision == false {
-							game.drawOps.GeoM.Reset()
-							game.drawOps.GeoM.Translate(float64(game.levelOneEnemyList[i].enemyProjectileList[j].xLoc),
-								float64(game.levelOneEnemyList[i].enemyProjectileList[j].yLoc))
-							screen.DrawImage(game.levelOneEnemyList[i].enemyProjectileList[j].upPict, &game.drawOps)
+			if len(game.levelOneEnemyList) > 0 {
+				for i := 0; i < len(game.levelOneEnemyList); i++ {
+					if game.levelOneEnemyList[i].collision == false {
+						game.drawOps.GeoM.Reset()
+						game.drawOps.GeoM.Translate(float64(game.levelOneEnemyList[i].xLoc), float64(game.levelOneEnemyList[i].yLoc))
+						if game.levelOneEnemyList[i].direction == "left" {
+							screen.DrawImage(game.levelOneEnemyList[i].leftPict, &game.drawOps)
+						} else if game.levelOneEnemyList[i].direction == "right" {
+							screen.DrawImage(game.levelOneEnemyList[i].rightPict, &game.drawOps)
+						} else if game.levelOneEnemyList[i].direction == "up" {
+							screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
+						} else if game.levelOneEnemyList[i].direction == "down" {
+							screen.DrawImage(game.levelOneEnemyList[i].downPict, &game.drawOps)
+						} else {
+							screen.DrawImage(game.levelOneEnemyList[i].upPict, &game.drawOps)
 						}
 					}
 				}
 			}
-		}
 
-		if len(game.projectileList) > 0 {
-			for i := 0; i < len(game.projectileList); i++ {
-				if game.projectileList[i].collision == false {
-					game.drawOps.GeoM.Reset()
-					game.drawOps.GeoM.Translate(float64(game.projectileList[i].xLoc), float64(game.projectileList[i].yLoc))
-					screen.DrawImage(game.projectileList[i].upPict, &game.drawOps)
+			if len(game.levelOneEnemyList) > 0 {
+				for i := 0; i < len(game.levelOneEnemyList); i++ {
+					if len(game.levelOneEnemyList[i].enemyProjectileList) > 0 {
+						for j := 0; j < len(game.levelOneEnemyList[i].enemyProjectileList); j++ {
+							if game.levelOneEnemyList[i].enemyProjectileList[j].collision == false {
+								game.drawOps.GeoM.Reset()
+								game.drawOps.GeoM.Translate(float64(game.levelOneEnemyList[i].enemyProjectileList[j].xLoc),
+									float64(game.levelOneEnemyList[i].enemyProjectileList[j].yLoc))
+								screen.DrawImage(game.levelOneEnemyList[i].enemyProjectileList[j].upPict, &game.drawOps)
+							}
+						}
+					}
+				}
+			}
+
+			if len(game.projectileList) > 0 {
+				for i := 0; i < len(game.projectileList); i++ {
+					if game.projectileList[i].collision == false {
+						game.drawOps.GeoM.Reset()
+						game.drawOps.GeoM.Translate(float64(game.projectileList[i].xLoc), float64(game.projectileList[i].yLoc))
+						screen.DrawImage(game.projectileList[i].upPict, &game.drawOps)
+					}
+				}
+			}
+		} else if game.levelTwoIsActive {
+			game.drawOps.GeoM.Reset()
+			game.drawOps.GeoM.Translate(float64(game.secondMap.xLoc), float64(game.secondMap.yLoc))
+			screen.DrawImage(game.secondMap.upPict, &game.drawOps)
+
+			if len(game.levelTwoEnemyList) > 0 {
+				for i := 0; i < len(game.levelTwoEnemyList); i++ {
+					if game.levelTwoEnemyList[i].collision == false {
+						game.drawOps.GeoM.Reset()
+						game.drawOps.GeoM.Translate(float64(game.levelTwoEnemyList[i].xLoc), float64(game.levelTwoEnemyList[i].yLoc))
+						if game.levelTwoEnemyList[i].direction == "left" {
+							screen.DrawImage(game.levelTwoEnemyList[i].leftPict, &game.drawOps)
+						} else if game.levelTwoEnemyList[i].direction == "right" {
+							screen.DrawImage(game.levelTwoEnemyList[i].rightPict, &game.drawOps)
+						} else if game.levelTwoEnemyList[i].direction == "up" {
+							screen.DrawImage(game.levelTwoEnemyList[i].upPict, &game.drawOps)
+						} else if game.levelTwoEnemyList[i].direction == "down" {
+							screen.DrawImage(game.levelTwoEnemyList[i].downPict, &game.drawOps)
+						} else {
+							screen.DrawImage(game.levelTwoEnemyList[i].upPict, &game.drawOps)
+						}
+					}
+				}
+			}
+
+			if len(game.levelTwoEnemyList) > 0 {
+				for i := 0; i < len(game.levelTwoEnemyList); i++ {
+					if len(game.levelTwoEnemyList[i].enemyProjectileList) > 0 {
+						for j := 0; j < len(game.levelTwoEnemyList[i].enemyProjectileList); j++ {
+							if game.levelTwoEnemyList[i].enemyProjectileList[j].collision == false {
+								game.drawOps.GeoM.Reset()
+								game.drawOps.GeoM.Translate(float64(game.levelTwoEnemyList[i].enemyProjectileList[j].xLoc),
+									float64(game.levelTwoEnemyList[i].enemyProjectileList[j].yLoc))
+								screen.DrawImage(game.levelTwoEnemyList[i].enemyProjectileList[j].upPict, &game.drawOps)
+							}
+						}
+					}
+				}
+			}
+
+			if len(game.projectileList) > 0 {
+				for i := 0; i < len(game.projectileList); i++ {
+					if game.projectileList[i].collision == false {
+						game.drawOps.GeoM.Reset()
+						game.drawOps.GeoM.Translate(float64(game.projectileList[i].xLoc), float64(game.projectileList[i].yLoc))
+						screen.DrawImage(game.projectileList[i].upPict, &game.drawOps)
+					}
 				}
 			}
 		}
@@ -914,6 +1105,12 @@ func loadImage(game *Game) {
 		log.Fatal("failed to load image", err)
 	}
 	game.firstMap.upPict = firstMap
+
+	secondMap, _, err := ebitenutil.NewImageFromFile("Level2.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.secondMap.upPict = secondMap
 
 	upPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquare.png")
 	if err != nil {
