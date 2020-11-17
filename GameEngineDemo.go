@@ -115,13 +115,22 @@ func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, e
 		anyProjectileSprite.xLoc+projectileWidth > anyEnemy.xLoc &&
 		anyProjectileSprite.yLoc < anyEnemy.yLoc+enemyWidth &&
 		anyProjectileSprite.yLoc+projectileWidth > anyEnemy.yLoc) && (anyEnemy.health == 2) {
-		fmt.Println("here")
 		anyEnemy.health -= 1
 		additionalScore := 100
 		return false, true, anyEnemy.health, additionalScore
 	}
 	additionalScore := 0
 	return false, false, anyEnemy.health, additionalScore
+}
+
+func projectileCollisionWithPlayer(player Sprite, anyProjectileSprite Sprite, playerWidth int, projectileWidth int) (bool, int) {
+	if anyProjectileSprite.xLoc < player.xLoc+playerWidth &&
+		anyProjectileSprite.xLoc+projectileWidth > player.xLoc &&
+		anyProjectileSprite.yLoc < player.yLoc+playerWidth &&
+		anyProjectileSprite.yLoc+projectileWidth > player.yLoc {
+		return true, 1
+	}
+	return false, 0
 }
 
 func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, playerWidth int) int {
@@ -181,51 +190,51 @@ func (game *Game) playerShootFireball() []Sprite {
 	return game.projectileList
 }
 
-func (game *Game) enemyShootFireball(enemySprite Sprite) ([]Sprite, bool) {
-	if enemySprite.projectileHold == false {
+func (game *Game) enemyShootFireball(i int) []Sprite {
+	if game.levelOneEnemyList[i].projectileHold == false && game.levelOneEnemyList[i].collision == false {
 
-		enemySprite.projectileHold = true
+		game.levelOneEnemyList[i].projectileHold = true
 		go func() {
-			<-time.After(2000 * time.Millisecond)
-			enemySprite.projectileHold = false
+			<-time.After(3000 * time.Millisecond)
+			game.levelOneEnemyList[i].projectileHold = false
 		}()
 		game.projectileAndWallCollision = false
 
 		tempFireball := game.fireball
 
-		if enemySprite.direction == "up" {
-			tempFireball.xLoc = enemySprite.xLoc + 20
-			tempFireball.yLoc = enemySprite.yLoc - 18
+		if game.levelOneEnemyList[i].direction == "up" {
+			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
+			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc - 18
 			tempFireball.dx = 0
-			tempFireball.dy = -10
-			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
-		} else if enemySprite.direction == "down" {
-			tempFireball.xLoc = enemySprite.xLoc + 20
-			tempFireball.yLoc = enemySprite.yLoc + 55
+			tempFireball.dy = -3
+			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+		} else if game.levelOneEnemyList[i].direction == "down" {
+			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
+			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 55
 			tempFireball.dx = 0
-			tempFireball.dy = 10
-			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
-		} else if enemySprite.direction == "left" {
-			tempFireball.xLoc = enemySprite.xLoc - 15
-			tempFireball.yLoc = enemySprite.yLoc + 18
-			tempFireball.dx = -10
+			tempFireball.dy = 3
+			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+		} else if game.levelOneEnemyList[i].direction == "left" {
+			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc - 15
+			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 18
+			tempFireball.dx = -3
 			tempFireball.dy = 0
-			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
-		} else if enemySprite.direction == "right" {
-			tempFireball.xLoc = enemySprite.xLoc + 55
-			tempFireball.yLoc = enemySprite.yLoc + 18
-			tempFireball.dx = 10
+			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
+		} else if game.levelOneEnemyList[i].direction == "right" {
+			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 55
+			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc + 18
+			tempFireball.dx = 3
 			tempFireball.dy = 0
-			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
 		} else {
-			tempFireball.xLoc = enemySprite.xLoc + 20
-			tempFireball.yLoc = enemySprite.yLoc - 18
+			tempFireball.xLoc = game.levelOneEnemyList[i].xLoc + 20
+			tempFireball.yLoc = game.levelOneEnemyList[i].yLoc - 18
 			tempFireball.dx = 0
-			tempFireball.dy = -10
-			enemySprite.enemyProjectileList = append(enemySprite.enemyProjectileList, tempFireball)
+			tempFireball.dy = -3
+			game.levelOneEnemyList[i].enemyProjectileList = append(game.levelOneEnemyList[i].enemyProjectileList, tempFireball)
 		}
 	}
-	return enemySprite.enemyProjectileList, enemySprite.projectileHold
+	return game.levelOneEnemyList[i].enemyProjectileList
 }
 
 func (game *Game) changeTankDirection() {
@@ -355,12 +364,11 @@ func (game *Game) movementLevel1Enemies() {
 						game.levelOneEnemyList[i].direction = "right"
 					} else {
 						game.levelOneEnemyList[i].direction = "down"
-						game.enemyShootFireball(game.levelOneEnemyList[i])
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-					game.levelOneEnemyList[i].enemyProjectileList, game.levelOneEnemyList[i].projectileHold =
-						game.enemyShootFireball(game.levelOneEnemyList[i])
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 
 				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
@@ -375,6 +383,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				} else if game.levelOneEnemyList[i].xLoc <= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
 					//enemy to the left and below player
@@ -388,6 +398,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
 					//enemy location to the right and below
@@ -401,6 +413,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				}
 			} else if math.Abs(float64(game.levelOneEnemyList[i].xLoc-game.playerSprite.xLoc)) >= 150 ||
 				math.Abs(float64(game.levelOneEnemyList[i].yLoc-game.playerSprite.yLoc)) >= 150 &&
@@ -505,8 +519,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
-					game.levelOneEnemyList[i].enemyProjectileList, game.levelOneEnemyList[i].projectileHold =
-						game.enemyShootFireball(game.levelOneEnemyList[i])
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc <= game.playerSprite.yLoc {
 					game.levelOneEnemyList[i].dx = -1
@@ -519,6 +533,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				} else if game.levelOneEnemyList[i].xLoc <= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
 					game.levelOneEnemyList[i].dx = 1
@@ -531,6 +547,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				} else if game.levelOneEnemyList[i].xLoc >= game.playerSprite.xLoc &&
 					game.levelOneEnemyList[i].yLoc >= game.playerSprite.yLoc {
 					game.levelOneEnemyList[i].dx = -1
@@ -543,6 +561,8 @@ func (game *Game) movementLevel1Enemies() {
 					}
 					game.levelOneEnemyList[i].xLoc += game.levelOneEnemyList[i].dx
 					game.levelOneEnemyList[i].yLoc += game.levelOneEnemyList[i].dy
+					game.levelOneEnemyList[i].enemyProjectileList =
+						game.enemyShootFireball(i)
 				}
 			}
 		}
@@ -555,6 +575,7 @@ func (game *Game) manageLevel1CollisionDetection() {
 		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
 	}
 
+	//player collision with wall check
 	if game.playerAndWallCollision == false {
 		game.playerAndWallCollision = wallCollisionCheckFirstLevel(game.playerSprite, 61)
 	} else {
@@ -564,6 +585,7 @@ func (game *Game) manageLevel1CollisionDetection() {
 		game.deathCounter += 1
 	}
 
+	//enemy collision with wall check
 	if len(game.levelOneEnemyList) > 0 {
 		for i := 0; i < len(game.levelOneEnemyList); i++ {
 			if game.levelOneEnemyList[i].collision == false {
@@ -581,12 +603,21 @@ func (game *Game) manageLevel1CollisionDetection() {
 					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
 				}
 			} else {
+				if game.levelOneEnemyList[i].health == 2 && game.levelOneEnemyList[i].collision == true {
+					game.score += 300
+					game.levelOneEnemyList[i].health = 0
+				}
+				if game.levelOneEnemyList[i].health == 1 && game.levelOneEnemyList[i].collision == true {
+					game.score += 200
+					game.levelOneEnemyList[i].health = 0
+				}
 				game.levelOneEnemyList[i].dx = 0
 				game.levelOneEnemyList[i].dy = 0
 			}
 		}
 	}
 
+	//player projectile collides with wall check
 	if len(game.projectileList) > 0 {
 		for i := 0; i < len(game.projectileList); i++ {
 			if game.projectileList[i].collision == false {
@@ -597,6 +628,23 @@ func (game *Game) manageLevel1CollisionDetection() {
 		}
 	}
 
+	//enemy projectile collides with wall check
+	if len(game.levelOneEnemyList) > 0 {
+		for i := 0; i < len(game.levelOneEnemyList); i++ {
+			if len(game.levelOneEnemyList[i].enemyProjectileList) > 0 {
+				for j := 0; j < len(game.levelOneEnemyList[i].enemyProjectileList); j++ {
+					if game.levelOneEnemyList[i].enemyProjectileList[j].collision == false {
+						game.levelOneEnemyList[i].enemyProjectileList[j].xLoc += game.levelOneEnemyList[i].enemyProjectileList[j].dx
+						game.levelOneEnemyList[i].enemyProjectileList[j].yLoc += game.levelOneEnemyList[i].enemyProjectileList[j].dy
+						game.levelOneEnemyList[i].enemyProjectileList[j].collision =
+							wallCollisionCheckFirstLevel(game.levelOneEnemyList[i].enemyProjectileList[j], 20)
+					}
+				}
+			}
+		}
+	}
+
+	//player collides with enemy check
 	if len(game.levelOneEnemyList) > 0 {
 		for i := 0; i < len(game.levelOneEnemyList); i++ {
 			if game.levelOneEnemyList[i].collision == false {
@@ -611,6 +659,28 @@ func (game *Game) manageLevel1CollisionDetection() {
 		}
 	}
 
+	//enemy projectile collides with player check
+	if len(game.levelOneEnemyList) > 0 {
+		for i := 0; i < len(game.levelOneEnemyList); i++ {
+			if len(game.levelOneEnemyList[i].enemyProjectileList) > 0 {
+				for j := 0; j < len(game.levelOneEnemyList[i].enemyProjectileList); j++ {
+					if game.levelOneEnemyList[i].enemyProjectileList[j].collision == false {
+						death := 0
+						game.levelOneEnemyList[i].enemyProjectileList[j].collision, death =
+							projectileCollisionWithPlayer(game.playerSprite,
+								game.levelOneEnemyList[i].enemyProjectileList[j], 61, 20)
+						if death == 1 {
+							game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+							game.deathCounter += death
+						}
+
+					}
+				}
+			}
+		}
+	}
+
+	//player projectile collides with enemy check
 	if len(game.projectileList) > 0 && len(game.levelOneEnemyList) > 0 {
 		for i := 0; i < len(game.projectileList); i++ {
 			for j := 0; j < len(game.levelOneEnemyList); j++ {
@@ -624,6 +694,7 @@ func (game *Game) manageLevel1CollisionDetection() {
 			}
 		}
 	}
+
 }
 
 func (game *Game) checkLevel() {
@@ -669,9 +740,7 @@ func (game *Game) Update() error {
 		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
-
-		fmt.Println(math.Abs(float64(game.levelOneEnemyList[0].xLoc - game.playerSprite.xLoc)))
-		fmt.Println(math.Abs(float64(game.levelOneEnemyList[0].yLoc - game.playerSprite.yLoc)))
+		fmt.Println(game.score)
 
 	} else if game.levelTwoIsActive == true && game.gameOver == false {
 
