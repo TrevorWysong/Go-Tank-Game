@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="00b1d884-569f-4270-84f5-2d92411e1285" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Level2.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/GameEngineDemo.go" beforeDir="false" afterPath="$PROJECT_DIR$/GameEngineDemo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,16 +81,17 @@
     <MESSAGE value="Added chasing, my brain hurts from keeping track of loops. Will add enemy projectiles now." />
     <MESSAGE value="Started implementing enemy projectiles, have a lot of work to do on them still" />
     <MESSAGE value="Finished enemy projectile implementation with collision detection. Will work on printing score to screen and adding the other two levels soon." />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished enemy projectile implementation with collision detection. Will work on printing score to screen and adding the other two levels soon." />
+    <MESSAGE value="Created another map in tiled and started implementing it." />
+    <option name="LAST_COMMIT_MESSAGE" value="Created another map in tiled and started implementing it." />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
   </component>
   <component name="WindowStateProjectService">
-    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1605572839525">
+    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1605639728742">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605572839525" />
+    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605639728742" />
     <state x="549" y="153" key="FileChooserDialogImpl" timestamp="1605381163956">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -101,26 +100,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="647" y="310" key="Github.ShareDialog/0.0.1536.824@0.0.1536.824" timestamp="1605381285752" />
-    <state width="1493" height="207" key="GridCell.Tab.0.bottom" timestamp="1605639631797">
+    <state width="1493" height="204" key="GridCell.Tab.0.bottom" timestamp="1605674970614">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605639631797" />
-    <state width="1493" height="207" key="GridCell.Tab.0.center" timestamp="1605639631797">
+    <state width="1493" height="204" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1605674970614" />
+    <state width="1493" height="204" key="GridCell.Tab.0.center" timestamp="1605674970614">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605639631797" />
-    <state width="1493" height="207" key="GridCell.Tab.0.left" timestamp="1605639631797">
+    <state width="1493" height="204" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1605674970614" />
+    <state width="1493" height="204" key="GridCell.Tab.0.left" timestamp="1605674970614">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605639631797" />
-    <state width="1493" height="207" key="GridCell.Tab.0.right" timestamp="1605639631797">
+    <state width="1493" height="204" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1605674970614" />
+    <state width="1493" height="204" key="GridCell.Tab.0.right" timestamp="1605674970614">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="207" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605639631797" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605572842845">
+    <state width="1493" height="204" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1605674970614" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605639732423">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605572842845" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605639732423" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1604453748557">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
