@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -47,6 +46,7 @@ type Game struct {
 	heartSprite1               Sprite
 	heartSprite2               Sprite
 	heartSprite3               Sprite
+	titleScreenBackground      Sprite
 	firstMap                   Sprite
 	secondMap                  Sprite
 	thirdMap                   Sprite
@@ -76,6 +76,9 @@ type Game struct {
 	spawnedLevel3Enemies       bool
 	gameOver                   bool
 	gameWon                    bool
+	userNameList               []string
+	userName                   string
+	startGame                  bool
 }
 
 func gotGold(player, gold Sprite) bool {
@@ -102,6 +105,89 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 		return true
 	}
 	return false
+}
+
+func (game *Game) getUserName() {
+	if inpututil.IsKeyJustReleased(ebiten.KeyBackspace) && len(game.userNameList) > 0 {
+		game.userNameList = game.userNameList[:len(game.userNameList)-1]
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyA) {
+		game.userNameList = append(game.userNameList, "A")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyB) {
+		game.userNameList = append(game.userNameList, "B")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyC) {
+		game.userNameList = append(game.userNameList, "C")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyD) {
+		game.userNameList = append(game.userNameList, "D")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyE) {
+		game.userNameList = append(game.userNameList, "E")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyF) {
+		game.userNameList = append(game.userNameList, "F")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyG) {
+		game.userNameList = append(game.userNameList, "G")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyH) {
+		game.userNameList = append(game.userNameList, "H")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyI) {
+		game.userNameList = append(game.userNameList, "I")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyJ) {
+		game.userNameList = append(game.userNameList, "J")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyK) {
+		game.userNameList = append(game.userNameList, "K")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyL) {
+		game.userNameList = append(game.userNameList, "L")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyM) {
+		game.userNameList = append(game.userNameList, "M")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyN) {
+		game.userNameList = append(game.userNameList, "N")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyO) {
+		game.userNameList = append(game.userNameList, "O")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyP) {
+		game.userNameList = append(game.userNameList, "P")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyQ) {
+		game.userNameList = append(game.userNameList, "Q")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyR) {
+		game.userNameList = append(game.userNameList, "R")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyS) {
+		game.userNameList = append(game.userNameList, "S")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyT) {
+		game.userNameList = append(game.userNameList, "T")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyU) {
+		game.userNameList = append(game.userNameList, "U")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyV) {
+		game.userNameList = append(game.userNameList, "V")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyW) {
+		game.userNameList = append(game.userNameList, "W")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyX) {
+		game.userNameList = append(game.userNameList, "x")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyY) {
+		game.userNameList = append(game.userNameList, "Y")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyZ) {
+		game.userNameList = append(game.userNameList, "Z")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key0) {
+		game.userNameList = append(game.userNameList, "0")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key1) {
+		game.userNameList = append(game.userNameList, "1")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key2) {
+		game.userNameList = append(game.userNameList, "2")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key3) {
+		game.userNameList = append(game.userNameList, "3")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key4) {
+		game.userNameList = append(game.userNameList, "4")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key5) {
+		game.userNameList = append(game.userNameList, "5")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key6) {
+		game.userNameList = append(game.userNameList, "6")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key7) {
+		game.userNameList = append(game.userNameList, "7")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key8) {
+		game.userNameList = append(game.userNameList, "8")
+	} else if inpututil.IsKeyJustReleased(ebiten.Key9) {
+		game.userNameList = append(game.userNameList, "9")
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyEnter) == true && len(game.userNameList) > 0 {
+		for i := 0; i < len(game.userNameList); i++ {
+			game.userName += game.userNameList[i]
+		}
+		game.startGame = true
+	}
 }
 
 func wallCollisionCheckSecondLevel(anySprite Sprite, spriteWidth int) bool {
@@ -1581,6 +1667,7 @@ func (game *Game) checkLevel() {
 }
 
 func (game *Game) Update() error {
+	ebitenutil.DebugPrintAt(game.firstMap.upPict, (game.userName), 100, 100)
 	game.checkLevel()
 
 	if game.deathCounter >= 3 && game.gameWon == false {
@@ -1593,7 +1680,9 @@ func (game *Game) Update() error {
 		game.gameOver = false
 	}
 
-	if game.levelOneIsActive == true && game.gameOver == false {
+	if game.startGame == false {
+		game.getUserName()
+	} else if game.startGame == true && game.levelOneIsActive == true && game.gameOver == false {
 		game.spawnLevel1Enemies()
 		game.movementLevel1Enemies()
 		game.changeTankDirection()
@@ -1601,11 +1690,7 @@ func (game *Game) Update() error {
 		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel1CollisionDetection()
-		fmt.Print("Gamewon: ")
-		fmt.Println(game.gameWon)
-		fmt.Print("Gameover: ")
-		fmt.Println(game.gameOver)
-	} else if game.levelTwoIsActive == true && game.gameOver == false {
+	} else if game.startGame == true && game.levelTwoIsActive == true && game.gameOver == false {
 		game.spawnLevel2Enemies()
 		game.movementLevel2Enemies()
 		game.changeTankDirection()
@@ -1613,7 +1698,7 @@ func (game *Game) Update() error {
 		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel2CollisionDetection()
-	} else if game.levelThreeIsActive == true && game.gameOver == false && game.gameWon == false {
+	} else if game.startGame == true && game.levelThreeIsActive == true && game.gameOver == false && game.gameWon == false {
 		game.spawnLevel3Enemies()
 		game.movementLevel3Enemies()
 		game.changeTankDirection()
@@ -1621,9 +1706,9 @@ func (game *Game) Update() error {
 		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel3CollisionDetection()
-	} else if game.gameOver == true {
+	} else if game.startGame == true && game.gameOver == true {
 
-	} else if game.gameWon == true {
+	} else if game.startGame == true && game.gameWon == true {
 
 	} else {
 		game.spawnLevel1Enemies()
@@ -1638,7 +1723,12 @@ func (game *Game) Update() error {
 
 func (game Game) Draw(screen *ebiten.Image) {
 	//screen.Fill(colornames.Chocolate)
-	if game.gameOver == false && game.gameWon == false {
+	if game.startGame == false {
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.titleScreenBackground.xLoc), float64(game.titleScreenBackground.yLoc))
+		screen.DrawImage(game.titleScreenBackground.upPict, &game.drawOps)
+	}
+	if game.startGame == true && game.gameOver == false && game.gameWon == false {
 		if game.levelOneIsActive {
 			game.drawOps.GeoM.Reset()
 			game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
@@ -1885,6 +1975,12 @@ func main() {
 }
 
 func loadImage(game *Game) {
+	titleScreenBackground, _, err := ebitenutil.NewImageFromFile("background.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.titleScreenBackground.upPict = titleScreenBackground
+
 	firstMap, _, err := ebitenutil.NewImageFromFile("Level1Correct.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
