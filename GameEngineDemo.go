@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -8,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
+	_ "github.com/mattn/go-sqlite3"
 	"golang.org/x/image/colornames"
 	"golang.org/x/image/font"
 	"golang.org/x/image/font/opentype"
@@ -17,6 +19,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"strconv"
 	"time"
 )
 
@@ -1715,7 +1718,6 @@ func (game *Game) checkLevel() {
 }
 
 func (game *Game) Update() error {
-	//ebitenutil.DebugPrintAt(game.firstMap.upPict, (game.userName), 100, 100)
 	game.checkLevel()
 
 	if game.deathCounter >= 3 && game.gameWon == false {
@@ -1729,16 +1731,7 @@ func (game *Game) Update() error {
 	}
 
 	if game.startGame == false {
-		//game.getUserName()
-		//if len(game.userNameList) > 0 {
-		//	game.userName = ""
-		//	game.iterateAndPrintUserNameList()
-		//	game.drawOps.GeoM.Reset()
-		//	text.Draw(game.titleScreenBackground.upPict, "Enter Username: " + game.userName, mplusNormalFont, 100, 40, color.White)
-		//	fmt.Println(game.userName)
-		//}
 		game.getUserName()
-
 	} else if game.startGame == true && game.levelOneIsActive == true && game.gameOver == false {
 		game.spawnLevel1Enemies()
 		game.movementLevel1Enemies()
@@ -1797,10 +1790,13 @@ func (game Game) Draw(screen *ebiten.Image) {
 		}
 	}
 	if game.startGame == true && game.gameOver == false && game.gameWon == false {
+
 		if game.levelOneIsActive {
 			game.drawOps.GeoM.Reset()
 			game.drawOps.GeoM.Translate(float64(game.firstMap.xLoc), float64(game.firstMap.yLoc))
 			screen.DrawImage(game.firstMap.upPict, &game.drawOps)
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Score: "+strconv.Itoa(game.score), mplusNormalFont, ScreenWidth*0.77, ScreenHeight*0.08, colornames.White)
 
 			if len(game.levelOneEnemyList) > 0 {
 				for i := 0; i < len(game.levelOneEnemyList); i++ {
@@ -1851,6 +1847,9 @@ func (game Game) Draw(screen *ebiten.Image) {
 			game.drawOps.GeoM.Translate(float64(game.secondMap.xLoc), float64(game.secondMap.yLoc))
 			screen.DrawImage(game.secondMap.upPict, &game.drawOps)
 
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Score: "+strconv.Itoa(game.score), mplusNormalFont, ScreenWidth*0.77, ScreenHeight*0.08, colornames.White)
+
 			if len(game.levelTwoEnemyList) > 0 {
 				for i := 0; i < len(game.levelTwoEnemyList); i++ {
 					if game.levelTwoEnemyList[i].collision == false {
@@ -1899,6 +1898,9 @@ func (game Game) Draw(screen *ebiten.Image) {
 			game.drawOps.GeoM.Reset()
 			game.drawOps.GeoM.Translate(float64(game.thirdMap.xLoc), float64(game.thirdMap.yLoc))
 			screen.DrawImage(game.thirdMap.upPict, &game.drawOps)
+
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Score: "+strconv.Itoa(game.score), mplusNormalFont, ScreenWidth*0.77, ScreenHeight*0.08, colornames.White)
 
 			if len(game.levelThreeEnemyList) > 0 {
 				for i := 0; i < len(game.levelThreeEnemyList); i++ {
@@ -2010,11 +2012,40 @@ func (g Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight
 	return ScreenWidth, ScreenHeight
 }
 
+func OpenDataBase(dbfile string) *sql.DB {
+	database, err := sql.Open("sqlite3", dbfile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return database
+}
+
+func create_tables(database *sql.DB) {
+	createStatement1 := "CREATE TABLE IF NOT EXISTS players(    " +
+		"user_name TEXT NOT NULL," +
+		"score INTEGER DEFAULT 0);"
+
+	database.Exec(createStatement1)
+}
+
+func (game Game) addPlayerScore(database *sql.DB) {
+	insertStatement := "INSERT INTO PLAYERS (user_name, score) VALUES (?,?);"
+	preppedStatement, err := database.Prepare(insertStatement)
+	if err != nil {
+		log.Fatal(err)
+	}
+	preppedStatement.Exec(game.userName, game.score)
+}
+
 func main() {
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	ebiten.SetWindowTitle("Berserk/Tank Game by Trevor Wysong")
 	gameObject := Game{}
 	loadImage(&gameObject)
+
+	myDatabase := OpenDataBase("./LeaderBoard.db")
+	defer myDatabase.Close()
+	create_tables(myDatabase)
 
 	gameObject.tankTopper.xLoc = gameObject.playerSprite.xLoc
 	gameObject.tankTopper.yLoc = gameObject.playerSprite.yLoc
