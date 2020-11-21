@@ -1,10 +1,18 @@
 package main
 
 import (
+	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
+	"golang.org/x/image/colornames"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
+	_ "golang.org/x/image/font/opentype"
+	"image/color"
 	_ "image/png"
 	"log"
 	"math"
@@ -16,6 +24,40 @@ const (
 	ScreenWidth  = 800
 	ScreenHeight = 700
 )
+
+var (
+	mplusNormalFont font.Face
+	mplusBigFont    font.Face
+)
+
+func init() {
+	tt, err := opentype.Parse(fonts.MPlus1pRegular_ttf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	const dpi = 72
+	mplusNormalFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    24,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	mplusBigFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    48,
+		DPI:     dpi,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 type Sprite struct {
 	upPict              *ebiten.Image
@@ -107,6 +149,12 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 	return false
 }
 
+func (game *Game) iterateAndStoreUserName() {
+	for i := 0; i < len(game.userNameList); i++ {
+		game.userName += game.userNameList[i]
+	}
+}
+
 func (game *Game) getUserName() {
 	if inpututil.IsKeyJustReleased(ebiten.KeyBackspace) && len(game.userNameList) > 0 {
 		game.userNameList = game.userNameList[:len(game.userNameList)-1]
@@ -157,7 +205,7 @@ func (game *Game) getUserName() {
 	} else if inpututil.IsKeyJustReleased(ebiten.KeyW) {
 		game.userNameList = append(game.userNameList, "W")
 	} else if inpututil.IsKeyJustReleased(ebiten.KeyX) {
-		game.userNameList = append(game.userNameList, "x")
+		game.userNameList = append(game.userNameList, "X")
 	} else if inpututil.IsKeyJustReleased(ebiten.KeyY) {
 		game.userNameList = append(game.userNameList, "Y")
 	} else if inpututil.IsKeyJustReleased(ebiten.KeyZ) {
@@ -1667,7 +1715,7 @@ func (game *Game) checkLevel() {
 }
 
 func (game *Game) Update() error {
-	ebitenutil.DebugPrintAt(game.firstMap.upPict, (game.userName), 100, 100)
+	//ebitenutil.DebugPrintAt(game.firstMap.upPict, (game.userName), 100, 100)
 	game.checkLevel()
 
 	if game.deathCounter >= 3 && game.gameWon == false {
@@ -1681,7 +1729,16 @@ func (game *Game) Update() error {
 	}
 
 	if game.startGame == false {
+		//game.getUserName()
+		//if len(game.userNameList) > 0 {
+		//	game.userName = ""
+		//	game.iterateAndPrintUserNameList()
+		//	game.drawOps.GeoM.Reset()
+		//	text.Draw(game.titleScreenBackground.upPict, "Enter Username: " + game.userName, mplusNormalFont, 100, 40, color.White)
+		//	fmt.Println(game.userName)
+		//}
 		game.getUserName()
+
 	} else if game.startGame == true && game.levelOneIsActive == true && game.gameOver == false {
 		game.spawnLevel1Enemies()
 		game.movementLevel1Enemies()
@@ -1722,11 +1779,22 @@ func (game *Game) Update() error {
 }
 
 func (game Game) Draw(screen *ebiten.Image) {
-	//screen.Fill(colornames.Chocolate)
 	if game.startGame == false {
 		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.titleScreenBackground.xLoc), float64(game.titleScreenBackground.yLoc))
 		screen.DrawImage(game.titleScreenBackground.upPict, &game.drawOps)
+
+		game.drawOps.GeoM.Reset()
+		text.Draw(screen, "Enter Username: ", mplusNormalFont, ScreenWidth*0.20, ScreenHeight*0.25, colornames.White)
+
+		if len(game.userNameList) > 0 {
+			game.iterateAndStoreUserName()
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Enter Username: "+game.userName, mplusNormalFont, ScreenWidth*0.20, ScreenHeight*0.25, colornames.White)
+			fmt.Println(game.userName)
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Press ENTER to start Berserk/Tank game.", mplusNormalFont, ScreenWidth*0.20, ScreenHeight*0.45, color.Black)
+		}
 	}
 	if game.startGame == true && game.gameOver == false && game.gameWon == false {
 		if game.levelOneIsActive {
@@ -1975,43 +2043,43 @@ func main() {
 }
 
 func loadImage(game *Game) {
-	titleScreenBackground, _, err := ebitenutil.NewImageFromFile("background.png")
+	titleScreenBackground, _, err := ebitenutil.NewImageFromFile("art assets/background.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
 	game.titleScreenBackground.upPict = titleScreenBackground
 
-	firstMap, _, err := ebitenutil.NewImageFromFile("Level1Correct.png")
+	firstMap, _, err := ebitenutil.NewImageFromFile("art assets/Level1Correct.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
 	game.firstMap.upPict = firstMap
 
-	secondMap, _, err := ebitenutil.NewImageFromFile("Level2.png")
+	secondMap, _, err := ebitenutil.NewImageFromFile("art assets/Level2.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
 	game.secondMap.upPict = secondMap
 
-	thirdMap, _, err := ebitenutil.NewImageFromFile("Level3.png")
+	thirdMap, _, err := ebitenutil.NewImageFromFile("art assets/Level3.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
 	game.thirdMap.upPict = thirdMap
 
-	upPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquare.png")
+	upPlayer, _, err := ebitenutil.NewImageFromFile("art assets/tankFilledTopSquare.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	downPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquareDown.png")
+	downPlayer, _, err := ebitenutil.NewImageFromFile("art assets/tankFilledTopSquareDown.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	leftPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquareLeft.png")
+	leftPlayer, _, err := ebitenutil.NewImageFromFile("art assets/tankFilledTopSquareLeft.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	rightPlayer, _, err := ebitenutil.NewImageFromFile("tankFilledTopSquareRight.png")
+	rightPlayer, _, err := ebitenutil.NewImageFromFile("art assets/tankFilledTopSquareRight.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
@@ -2020,19 +2088,19 @@ func loadImage(game *Game) {
 	game.playerSprite.leftPict = leftPlayer
 	game.playerSprite.rightPict = rightPlayer
 
-	tankTopperUp, _, err := ebitenutil.NewImageFromFile("tankTopper.png")
+	tankTopperUp, _, err := ebitenutil.NewImageFromFile("art assets/tankTopper.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	tankTopperDown, _, err := ebitenutil.NewImageFromFile("tankTopperDown.png")
+	tankTopperDown, _, err := ebitenutil.NewImageFromFile("art assets/tankTopperDown.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	tankTopperLeft, _, err := ebitenutil.NewImageFromFile("tankTopperLeft.png")
+	tankTopperLeft, _, err := ebitenutil.NewImageFromFile("art assets/tankTopperLeft.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	tankTopperRight, _, err := ebitenutil.NewImageFromFile("tankTopperRight.png")
+	tankTopperRight, _, err := ebitenutil.NewImageFromFile("art assets/tankTopperRight.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
@@ -2041,31 +2109,31 @@ func loadImage(game *Game) {
 	game.tankTopper.leftPict = tankTopperLeft
 	game.tankTopper.rightPict = tankTopperRight
 
-	fireball, _, err := ebitenutil.NewImageFromFile("fireball.png")
+	fireball, _, err := ebitenutil.NewImageFromFile("art assets/fireball.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
 	game.fireball.upPict = fireball
 
-	coins, _, err := ebitenutil.NewImageFromFile("gold-coins-large.png")
+	coins, _, err := ebitenutil.NewImageFromFile("art assets/gold-coins-large.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
 	game.coinSprite.upPict = coins
 
-	personEnemyUp, _, err := ebitenutil.NewImageFromFile("personEnemyUp.png")
+	personEnemyUp, _, err := ebitenutil.NewImageFromFile("art assets/personEnemyUp.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	personEnemyDown, _, err := ebitenutil.NewImageFromFile("personEnemyDown.png")
+	personEnemyDown, _, err := ebitenutil.NewImageFromFile("art assets/personEnemyDown.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	personEnemyLeft, _, err := ebitenutil.NewImageFromFile("personEnemyLeft.png")
+	personEnemyLeft, _, err := ebitenutil.NewImageFromFile("art assets/personEnemyLeft.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	personEnemyRight, _, err := ebitenutil.NewImageFromFile("personEnemyRight.png")
+	personEnemyRight, _, err := ebitenutil.NewImageFromFile("art assets/personEnemyRight.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
@@ -2074,19 +2142,19 @@ func loadImage(game *Game) {
 	game.personEnemy.leftPict = personEnemyLeft
 	game.personEnemy.rightPict = personEnemyRight
 
-	monsterEnemyUp, _, err := ebitenutil.NewImageFromFile("monsterEnemyUp.png")
+	monsterEnemyUp, _, err := ebitenutil.NewImageFromFile("art assets/monsterEnemyUp.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	monsterEnemyDown, _, err := ebitenutil.NewImageFromFile("monsterEnemyDown.png")
+	monsterEnemyDown, _, err := ebitenutil.NewImageFromFile("art assets/monsterEnemyDown.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	monsterEnemyLeft, _, err := ebitenutil.NewImageFromFile("monsterEnemyLeft.png")
+	monsterEnemyLeft, _, err := ebitenutil.NewImageFromFile("art assets/monsterEnemyLeft.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
-	monsterEnemyRight, _, err := ebitenutil.NewImageFromFile("monsterEnemyRight.png")
+	monsterEnemyRight, _, err := ebitenutil.NewImageFromFile("art assets/monsterEnemyRight.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
@@ -2095,7 +2163,7 @@ func loadImage(game *Game) {
 	game.monsterEnemy.leftPict = monsterEnemyLeft
 	game.monsterEnemy.rightPict = monsterEnemyRight
 
-	heart, _, err := ebitenutil.NewImageFromFile("heartScaled.png")
+	heart, _, err := ebitenutil.NewImageFromFile("art assets/heartScaled.png")
 	if err != nil {
 		log.Fatal("failed to load image", err)
 	}
