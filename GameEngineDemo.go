@@ -1,11 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
-	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
+	raudio "github.com/hajimehoshi/ebiten/v2/examples/resources/audio"
 	"github.com/hajimehoshi/ebiten/v2/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/hajimehoshi/ebiten/v2/text"
@@ -19,6 +22,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"os"
 	"strconv"
 	"time"
 )
@@ -26,6 +30,7 @@ import (
 const (
 	ScreenWidth  = 800
 	ScreenHeight = 700
+	sampleRate   = 44100
 )
 
 var (
@@ -62,6 +67,144 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func init() {
+	var err error
+	// Initialize audio context.
+	g.audioContext = audio.NewContext(sampleRate)
+
+	playerDeathSound, err := os.Open("sounds/death.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	playerDeathSoundDecoded, err := wav.Decode(g.audioContext, playerDeathSound)
+
+	// Create an audio.Player that has one stream.
+	g.playerDeathAudioPlayer, err = audio.NewPlayer(g.audioContext, playerDeathSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	winSound, err := os.Open("sounds/win.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	winSoundDecoded, err := wav.Decode(g.audioContext, winSound)
+
+	// Create an audio.Player that has one stream.
+	g.winAudioPlayer, err = audio.NewPlayer(g.audioContext, winSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pickedUpBonusSound, err := os.Open("sounds/spawn.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	pickedUpBonusSoundDecoded, err := wav.Decode(g.audioContext, pickedUpBonusSound)
+
+	// Create an audio.Player that has one stream.
+	g.pickedUpBonusAudioPlayer, err = audio.NewPlayer(g.audioContext, pickedUpBonusSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	extraLifeSound, err := os.Open("sounds/health.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	extraLifeSoundDecoded, err := wav.Decode(g.audioContext, extraLifeSound)
+
+	// Create an audio.Player that has one stream.
+	g.extraLifeAudioPlayer, err = audio.NewPlayer(g.audioContext, extraLifeSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	loseSound, err := os.Open("sounds/game over.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	loseSoundDecoded, err := wav.Decode(g.audioContext, loseSound)
+
+	// Create an audio.Player that has one stream.
+	g.loseAudioPlayer, err = audio.NewPlayer(g.audioContext, loseSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	humanEnemyDeathSound, err := os.Open("sounds/human groan.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	humanEnemyDeathSoundDecoded, err := wav.Decode(g.audioContext, humanEnemyDeathSound)
+
+	// Create an audio.Player that has one stream.
+	g.humanEnemyDeathAudioPlayer, err = audio.NewPlayer(g.audioContext, humanEnemyDeathSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	monsterEnemyDeathSound, err := os.Open("sounds/monster death.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	monsterEnemyDeathSoundDecoded, err := wav.Decode(g.audioContext, monsterEnemyDeathSound)
+
+	// Create an audio.Player that has one stream.
+	g.monsterEnemyDeathAudioPlayer, err = audio.NewPlayer(g.audioContext, monsterEnemyDeathSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	monsterEnemyDamagedSound, err := os.Open("sounds/first monster hit.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	monsterEnemyDamagedSoundDecoded, err := wav.Decode(g.audioContext, monsterEnemyDamagedSound)
+
+	// Create an audio.Player that has one stream.
+	g.monsterEnemyDamagedAudioPlayer, err = audio.NewPlayer(g.audioContext, monsterEnemyDamagedSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	playerProjectileSound, err := os.Open("sounds/projectile.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	playerProjectileSoundDecoded, err := wav.Decode(g.audioContext, playerProjectileSound)
+
+	// Create an audio.Player that has one stream.
+	g.playerShootsProjectileAudioPlayer, err = audio.NewPlayer(g.audioContext, playerProjectileSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	enemyProjectileSound, err := os.Open("sounds/enemy projectile.wav")
+	if err != nil {
+		log.Fatal(err)
+	}
+	enemyProjectileSoundDecoded, err := wav.Decode(g.audioContext, enemyProjectileSound)
+
+	// Create an audio.Player that has one stream.
+	g.enemyShootsProjectileAudioPlayer, err = audio.NewPlayer(g.audioContext, enemyProjectileSoundDecoded)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Decode wav-formatted data and retrieve decoded PCM stream.
+	d, err := wav.Decode(g.audioContext, bytes.NewReader(raudio.Jab_wav))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create an audio.Player that has one stream.
+	g.enemyAndPlayerCollisionAudioPlayer, err = audio.NewPlayer(g.audioContext, d)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 type Sprite struct {
 	upPict              *ebiten.Image
 	downPict            *ebiten.Image
@@ -82,57 +225,96 @@ type Sprite struct {
 }
 
 type Game struct {
-	playerSprite               Sprite
-	personEnemy                Sprite
-	monsterEnemy               Sprite
-	tankTopper                 Sprite
-	fireball                   Sprite
-	coinSprite                 Sprite
-	heartSprite1               Sprite
-	heartSprite2               Sprite
-	heartSprite3               Sprite
-	titleScreenBackground      Sprite
-	firstMap                   Sprite
-	secondMap                  Sprite
-	thirdMap                   Sprite
-	drawOps                    ebiten.DrawImageOptions
-	collectedGold              bool
-	playerAndWallCollision     bool
-	projectileAndWallCollision bool
-	mostRecentKeyLeft          bool
-	mostRecentKeyRight         bool
-	mostRecentKeyDown          bool
-	mostRecentKeyUp            bool
-	mostRecentKeyA             bool
-	mostRecentKeyS             bool
-	mostRecentKeyD             bool
-	mostRecentKeyW             bool
-	deathCounter               int
-	score                      int
-	projectileList             []Sprite
-	levelOneEnemyList          []Sprite
-	levelTwoEnemyList          []Sprite
-	levelThreeEnemyList        []Sprite
-	levelOneIsActive           bool
-	levelTwoIsActive           bool
-	levelThreeIsActive         bool
-	spawnedLevel1Enemies       bool
-	spawnedLevel2Enemies       bool
-	spawnedLevel3Enemies       bool
-	gameOver                   bool
-	gameWon                    bool
-	userNameList               []string
-	userName                   string
-	startGame                  bool
+	playerSprite                       Sprite
+	personEnemy                        Sprite
+	monsterEnemy                       Sprite
+	tankTopper                         Sprite
+	fireball                           Sprite
+	coinSprite                         Sprite
+	heartSprite1                       Sprite
+	heartSprite2                       Sprite
+	heartSprite3                       Sprite
+	titleScreenBackground              Sprite
+	firstMap                           Sprite
+	secondMap                          Sprite
+	thirdMap                           Sprite
+	winnerScreen                       Sprite
+	loserScreen                        Sprite
+	drawOps                            ebiten.DrawImageOptions
+	collectedGold                      bool
+	playerAndWallCollision             bool
+	projectileAndWallCollision         bool
+	mostRecentKeyLeft                  bool
+	mostRecentKeyRight                 bool
+	mostRecentKeyDown                  bool
+	mostRecentKeyUp                    bool
+	mostRecentKeyA                     bool
+	mostRecentKeyS                     bool
+	mostRecentKeyD                     bool
+	mostRecentKeyW                     bool
+	deathCounter                       int
+	score                              int
+	projectileList                     []Sprite
+	levelOneEnemyList                  []Sprite
+	levelTwoEnemyList                  []Sprite
+	levelThreeEnemyList                []Sprite
+	levelOneIsActive                   bool
+	levelTwoIsActive                   bool
+	levelThreeIsActive                 bool
+	spawnedLevel1Enemies               bool
+	spawnedLevel2Enemies               bool
+	spawnedLevel3Enemies               bool
+	gameOver                           bool
+	gameWon                            bool
+	userNameList                       []string
+	userName                           string
+	startGame                          bool
+	dbEntryComplete                    bool
+	processedDB                        bool
+	audioContext                       *audio.Context
+	playerDeathAudioPlayer             *audio.Player
+	humanEnemyDeathAudioPlayer         *audio.Player
+	monsterEnemyDeathAudioPlayer       *audio.Player
+	monsterEnemyDamagedAudioPlayer     *audio.Player
+	winAudioPlayer                     *audio.Player
+	loseAudioPlayer                    *audio.Player
+	playerShootsProjectileAudioPlayer  *audio.Player
+	enemyShootsProjectileAudioPlayer   *audio.Player
+	enemyAndPlayerCollisionAudioPlayer *audio.Player
+	pickedUpBonusAudioPlayer           *audio.Player
+	extraLifeAudioPlayer               *audio.Player
+	playedWinSound                     bool
+	playedLoseSound                    bool
+	extraLifeAwarded                   bool
 }
 
-func gotGold(player, gold Sprite) bool {
+var g Game
+var userNameMap = make(map[int][]string)
+var scoreMap = make(map[int][]int)
+var dbUserNameList []string
+var dbUserNameListSorted []string
+var dbScoreList []int
+var dbScoreListSorted []int
+
+func (game *Game) gotGold(player, gold Sprite) bool {
 	goldWidth, goldHeight := gold.upPict.Size()
 	playerWidth, playerHeight := player.upPict.Size()
 	if player.xLoc < gold.xLoc+goldWidth &&
 		player.xLoc+playerWidth > gold.xLoc &&
 		player.yLoc < gold.yLoc+goldHeight &&
 		player.yLoc+playerHeight > gold.yLoc {
+		if game.score%100 == 0 {
+			g.pickedUpBonusAudioPlayer.Rewind()
+			g.pickedUpBonusAudioPlayer.Play()
+		} else if game.score%100 != 0 {
+			g.extraLifeAudioPlayer.Rewind()
+			g.extraLifeAudioPlayer.Play()
+			if game.deathCounter > 0 {
+				game.deathCounter -= 1
+				game.extraLifeAwarded = true
+			}
+		}
+		game.score += 25
 		return true
 	}
 	return false
@@ -269,6 +451,13 @@ func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, e
 		anyProjectileSprite.xLoc+projectileWidth > anyEnemy.xLoc &&
 		anyProjectileSprite.yLoc < anyEnemy.yLoc+enemyWidth &&
 		anyProjectileSprite.yLoc+projectileWidth > anyEnemy.yLoc) && (anyEnemy.health == 1) {
+		if enemyWidth == 50 {
+			g.monsterEnemyDeathAudioPlayer.Rewind()
+			g.monsterEnemyDeathAudioPlayer.Play()
+		} else {
+			g.humanEnemyDeathAudioPlayer.Rewind()
+			g.humanEnemyDeathAudioPlayer.Play()
+		}
 		anyEnemy.health -= 1
 		additionalScore := 200
 		return true, true, anyEnemy.health, additionalScore
@@ -276,6 +465,8 @@ func projectileCollisionWithEnemy(anyEnemy Sprite, anyProjectileSprite Sprite, e
 		anyProjectileSprite.xLoc+projectileWidth > anyEnemy.xLoc &&
 		anyProjectileSprite.yLoc < anyEnemy.yLoc+enemyWidth &&
 		anyProjectileSprite.yLoc+projectileWidth > anyEnemy.yLoc) && (anyEnemy.health == 2) {
+		g.monsterEnemyDamagedAudioPlayer.Rewind()
+		g.monsterEnemyDamagedAudioPlayer.Play()
 		anyEnemy.health -= 1
 		additionalScore := 100
 		return false, true, anyEnemy.health, additionalScore
@@ -308,6 +499,8 @@ func playerCollisionWithEnemy(anyEnemy Sprite, player Sprite, enemyWidth int, pl
 
 func (game *Game) playerShootFireball() []Sprite {
 	if inpututil.IsKeyJustReleased(ebiten.KeySpace) && game.playerSprite.projectileHold == false {
+		g.playerShootsProjectileAudioPlayer.Rewind()
+		g.playerShootsProjectileAudioPlayer.Play()
 		game.playerSprite.projectileHold = true
 		go func() {
 			<-time.After(500 * time.Millisecond)
@@ -355,6 +548,9 @@ func (game *Game) enemyShootFireball(i int) []Sprite {
 	if game.levelOneIsActive {
 		if game.levelOneEnemyList[i].projectileHold == false && game.levelOneEnemyList[i].collision == false {
 			game.levelOneEnemyList[i].projectileHold = true
+			g.enemyShootsProjectileAudioPlayer.Rewind()
+			g.enemyShootsProjectileAudioPlayer.Play()
+
 			go func() {
 				<-time.After(3000 * time.Millisecond)
 				game.levelOneEnemyList[i].projectileHold = false
@@ -399,8 +595,10 @@ func (game *Game) enemyShootFireball(i int) []Sprite {
 
 	} else if game.levelTwoIsActive {
 		if game.levelTwoEnemyList[i].projectileHold == false && game.levelTwoEnemyList[i].collision == false {
-
 			game.levelTwoEnemyList[i].projectileHold = true
+			g.enemyShootsProjectileAudioPlayer.Rewind()
+			g.enemyShootsProjectileAudioPlayer.Play()
+
 			go func() {
 				<-time.After(3000 * time.Millisecond)
 				game.levelTwoEnemyList[i].projectileHold = false
@@ -445,8 +643,10 @@ func (game *Game) enemyShootFireball(i int) []Sprite {
 
 	} else if game.levelThreeIsActive {
 		if game.levelThreeEnemyList[i].projectileHold == false && game.levelThreeEnemyList[i].collision == false {
-
 			game.levelThreeEnemyList[i].projectileHold = true
+			g.enemyShootsProjectileAudioPlayer.Rewind()
+			g.enemyShootsProjectileAudioPlayer.Play()
+
 			go func() {
 				<-time.After(3000 * time.Millisecond)
 				game.levelThreeEnemyList[i].projectileHold = false
@@ -604,6 +804,10 @@ func (game *Game) spawnLevel1Enemies() {
 
 func (game *Game) spawnLevel2Enemies() {
 	if game.spawnedLevel2Enemies == false {
+		game.collectedGold = false
+		rand.Seed(int64(time.Now().Second()))
+		game.coinSprite.xLoc = rand.Intn(ScreenWidth - 72)
+		game.coinSprite.yLoc = rand.Intn(ScreenHeight - 72)
 		personEnemy1 := game.personEnemy
 		personEnemy2 := game.personEnemy
 		monsterEnemy1 := game.monsterEnemy
@@ -635,6 +839,12 @@ func (game *Game) spawnLevel2Enemies() {
 
 func (game *Game) spawnLevel3Enemies() {
 	if game.spawnedLevel3Enemies == false {
+		if game.extraLifeAwarded == false {
+			game.collectedGold = false
+			rand.Seed(int64(time.Now().Second()))
+			game.coinSprite.xLoc = rand.Intn(ScreenWidth - 72)
+			game.coinSprite.yLoc = rand.Intn(ScreenHeight - 72)
+		}
 		personEnemy1 := game.personEnemy
 		personEnemy2 := game.personEnemy
 		monsterEnemy1 := game.monsterEnemy
@@ -1302,7 +1512,7 @@ func (game *Game) movementLevel3Enemies() {
 
 func (game *Game) manageLevel1CollisionDetection() {
 	if game.collectedGold == false {
-		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
+		game.collectedGold = game.gotGold(game.playerSprite, game.coinSprite)
 	}
 
 	//player collision with wall check
@@ -1313,6 +1523,8 @@ func (game *Game) manageLevel1CollisionDetection() {
 		game.playerSprite.xLoc = 74 //player width
 		game.playerAndWallCollision = false
 		game.deathCounter += 1
+		g.playerDeathAudioPlayer.Rewind()
+		g.playerDeathAudioPlayer.Play()
 	}
 
 	//enemy collision with wall check
@@ -1322,15 +1534,43 @@ func (game *Game) manageLevel1CollisionDetection() {
 				if game.levelOneEnemyList[i].direction == "left" {
 					spriteWidth, _ := game.levelOneEnemyList[i].leftPict.Size()
 					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+					if game.levelOneEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelOneEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelOneEnemyList[i].direction == "right" {
 					spriteWidth, _ := game.levelOneEnemyList[i].rightPict.Size()
 					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+					if game.levelOneEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelOneEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelOneEnemyList[i].direction == "up" {
 					spriteWidth, _ := game.levelOneEnemyList[i].upPict.Size()
 					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+					if game.levelOneEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelOneEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelOneEnemyList[i].direction == "down" {
 					spriteWidth, _ := game.levelOneEnemyList[i].downPict.Size()
 					game.levelOneEnemyList[i].collision = wallCollisionCheckFirstLevel(game.levelOneEnemyList[i], spriteWidth)
+					if game.levelOneEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelOneEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				}
 			} else {
 				if game.levelOneEnemyList[i].health == 2 && game.levelOneEnemyList[i].collision == true {
@@ -1382,6 +1622,8 @@ func (game *Game) manageLevel1CollisionDetection() {
 				playerWidth, _ := game.playerSprite.upPict.Size()
 				death := playerCollisionWithEnemy(game.levelOneEnemyList[i], game.playerSprite, enemyWidth, playerWidth)
 				if death == 1 {
+					g.enemyAndPlayerCollisionAudioPlayer.Rewind()
+					g.enemyAndPlayerCollisionAudioPlayer.Play()
 					game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
 					game.deathCounter += death
 				}
@@ -1400,6 +1642,8 @@ func (game *Game) manageLevel1CollisionDetection() {
 							projectileCollisionWithPlayer(game.playerSprite,
 								game.levelOneEnemyList[i].enemyProjectileList[j], 61, 20)
 						if death == 1 {
+							g.playerDeathAudioPlayer.Rewind()
+							g.playerDeathAudioPlayer.Play()
 							game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
 							game.deathCounter += death
 						}
@@ -1428,7 +1672,7 @@ func (game *Game) manageLevel1CollisionDetection() {
 
 func (game *Game) manageLevel2CollisionDetection() {
 	if game.collectedGold == false {
-		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
+		game.collectedGold = game.gotGold(game.playerSprite, game.coinSprite)
 	}
 
 	//player collision with wall check
@@ -1438,6 +1682,8 @@ func (game *Game) manageLevel2CollisionDetection() {
 		game.playerSprite.yLoc = ScreenHeight / 2
 		game.playerSprite.xLoc = 74 //player width
 		game.playerAndWallCollision = false
+		g.playerDeathAudioPlayer.Rewind()
+		g.playerDeathAudioPlayer.Play()
 		game.deathCounter += 1
 	}
 
@@ -1508,6 +1754,8 @@ func (game *Game) manageLevel2CollisionDetection() {
 				playerWidth, _ := game.playerSprite.upPict.Size()
 				death := playerCollisionWithEnemy(game.levelTwoEnemyList[i], game.playerSprite, enemyWidth, playerWidth)
 				if death == 1 {
+					g.enemyAndPlayerCollisionAudioPlayer.Rewind()
+					g.enemyAndPlayerCollisionAudioPlayer.Play()
 					game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
 					game.deathCounter += death
 				}
@@ -1526,6 +1774,8 @@ func (game *Game) manageLevel2CollisionDetection() {
 							projectileCollisionWithPlayer(game.playerSprite,
 								game.levelTwoEnemyList[i].enemyProjectileList[j], 61, 20)
 						if death == 1 {
+							g.playerDeathAudioPlayer.Rewind()
+							g.playerDeathAudioPlayer.Play()
 							game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
 							game.deathCounter += death
 						}
@@ -1554,7 +1804,7 @@ func (game *Game) manageLevel2CollisionDetection() {
 
 func (game *Game) manageLevel3CollisionDetection() {
 	if game.collectedGold == false {
-		game.collectedGold = gotGold(game.playerSprite, game.coinSprite)
+		game.collectedGold = game.gotGold(game.playerSprite, game.coinSprite)
 	}
 
 	//player collision with wall check
@@ -1564,6 +1814,8 @@ func (game *Game) manageLevel3CollisionDetection() {
 		game.playerSprite.yLoc = ScreenHeight / 2
 		game.playerSprite.xLoc = 74 //player width
 		game.playerAndWallCollision = false
+		g.playerDeathAudioPlayer.Rewind()
+		g.playerDeathAudioPlayer.Play()
 		game.deathCounter += 1
 	}
 
@@ -1634,6 +1886,8 @@ func (game *Game) manageLevel3CollisionDetection() {
 				playerWidth, _ := game.playerSprite.upPict.Size()
 				death := playerCollisionWithEnemy(game.levelThreeEnemyList[i], game.playerSprite, enemyWidth, playerWidth)
 				if death == 1 {
+					g.enemyAndPlayerCollisionAudioPlayer.Rewind()
+					g.enemyAndPlayerCollisionAudioPlayer.Play()
 					game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
 					game.deathCounter += death
 				}
@@ -1653,6 +1907,8 @@ func (game *Game) manageLevel3CollisionDetection() {
 								game.levelThreeEnemyList[i].enemyProjectileList[j], 61, 20)
 						if death == 1 {
 							game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+							g.playerDeathAudioPlayer.Rewind()
+							g.playerDeathAudioPlayer.Play()
 							game.deathCounter += death
 						}
 
@@ -1719,13 +1975,22 @@ func (game *Game) checkLevel() {
 
 func (game *Game) Update() error {
 	game.checkLevel()
-
 	if game.deathCounter >= 3 && game.gameWon == false {
+		if game.playedLoseSound == false {
+			game.playedLoseSound = true
+			g.loseAudioPlayer.Rewind()
+			g.loseAudioPlayer.Play()
+		}
 		game.gameOver = true
 	} else {
 		game.gameOver = false
 	}
 	if game.score >= 3000 {
+		if game.playedWinSound == false {
+			game.playedWinSound = true
+			g.winAudioPlayer.Rewind()
+			g.winAudioPlayer.Play()
+		}
 		game.gameWon = true
 		game.gameOver = false
 	}
@@ -1756,9 +2021,27 @@ func (game *Game) Update() error {
 		game.playerShootFireball()
 		game.manageTankTopperOffset()
 		game.manageLevel3CollisionDetection()
-	} else if game.startGame == true && game.gameOver == true {
+	} else if game.startGame == true && game.gameOver == true && game.dbEntryComplete == false {
+		myDatabase := OpenDataBase("./LeaderBoard.db")
+		create_tables(myDatabase)
+		game.addGameEntry(myDatabase)
+		game.dbEntryComplete = true
+		myDatabase.Close()
+	} else if game.startGame == true && game.gameWon == true && game.dbEntryComplete == false {
+		myDatabase := OpenDataBase("./LeaderBoard.db")
+		create_tables(myDatabase)
+		game.addGameEntry(myDatabase)
+		game.dbEntryComplete = true
+		myDatabase.Close()
+	} else if game.startGame == true && game.gameWon == true && game.dbEntryComplete == true && game.processedDB == false {
+		game.processDBtoMaps()
+		game.processedDB = true
+	} else if game.startGame == true && game.gameOver == true && game.dbEntryComplete == true && game.processedDB == false {
+		game.processDBtoMaps()
+		game.processedDB = true
+	} else if game.startGame == true && game.gameWon == true && game.dbEntryComplete == true && game.processedDB == true {
 
-	} else if game.startGame == true && game.gameWon == true {
+	} else if game.startGame == true && game.gameOver == true && game.dbEntryComplete == true && game.processedDB == true {
 
 	} else {
 		game.spawnLevel1Enemies()
@@ -1784,7 +2067,6 @@ func (game Game) Draw(screen *ebiten.Image) {
 			game.iterateAndStoreUserName()
 			game.drawOps.GeoM.Reset()
 			text.Draw(screen, "Enter Username: "+game.userName, mplusNormalFont, ScreenWidth*0.20, ScreenHeight*0.25, colornames.White)
-			fmt.Println(game.userName)
 			game.drawOps.GeoM.Reset()
 			text.Draw(screen, "Press ENTER to start Berserk/Tank game.", mplusNormalFont, ScreenWidth*0.20, ScreenHeight*0.45, color.Black)
 		}
@@ -2005,6 +2287,38 @@ func (game Game) Draw(screen *ebiten.Image) {
 			game.drawOps.GeoM.Translate(float64(game.coinSprite.xLoc), float64(game.coinSprite.yLoc))
 			screen.DrawImage(game.coinSprite.upPict, &game.drawOps)
 		}
+	} else if game.startGame == true && game.gameOver == true && game.gameWon == false && game.processedDB == true {
+		tempHeight := 150
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.loserScreen.xLoc), float64(game.loserScreen.yLoc))
+		screen.DrawImage(game.loserScreen.upPict, &game.drawOps)
+		game.drawOps.GeoM.Reset()
+		text.Draw(screen, "LEADERBOARD", mplusNormalFont, ScreenWidth*0.40, ScreenHeight*0.08, colornames.White)
+		if len(userNameMap) > 0 {
+			for i := 0; i < len(userNameMap) && i < 20; i++ {
+
+				game.drawOps.GeoM.Reset()
+				text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
+
+				tempHeight += 25
+			}
+		}
+	} else if game.startGame == true && game.gameOver == false && game.gameWon == true && game.processedDB == true {
+		tempHeight := 150
+		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Translate(float64(game.winnerScreen.xLoc), float64(game.winnerScreen.yLoc))
+		screen.DrawImage(game.winnerScreen.upPict, &game.drawOps)
+		game.drawOps.GeoM.Reset()
+		text.Draw(screen, "LEADERBOARD", mplusNormalFont, ScreenWidth*0.40, ScreenHeight*0.08, colornames.White)
+		if len(userNameMap) > 0 {
+			for i := 0; i < len(userNameMap) && i < 20; i++ {
+
+				game.drawOps.GeoM.Reset()
+				text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
+
+				tempHeight += 25
+			}
+		}
 	}
 }
 
@@ -2024,11 +2338,10 @@ func create_tables(database *sql.DB) {
 	createStatement1 := "CREATE TABLE IF NOT EXISTS players(    " +
 		"user_name TEXT NOT NULL," +
 		"score INTEGER DEFAULT 0);"
-
 	database.Exec(createStatement1)
 }
 
-func (game Game) addPlayerScore(database *sql.DB) {
+func (game Game) addGameEntry(database *sql.DB) {
 	insertStatement := "INSERT INTO PLAYERS (user_name, score) VALUES (?,?);"
 	preppedStatement, err := database.Prepare(insertStatement)
 	if err != nil {
@@ -2037,15 +2350,41 @@ func (game Game) addPlayerScore(database *sql.DB) {
 	preppedStatement.Exec(game.userName, game.score)
 }
 
+func (game Game) processDBtoMaps() {
+	db, err := sql.Open("sqlite3", "./LeaderBoard.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	rows, err := db.Query("SELECT * FROM players ORDER BY score DESC")
+	if err != nil {
+		panic(err)
+	}
+
+	var temp_user_name string
+	var temp_score int
+	row_number := 0
+
+	for rows.Next() {
+		err = rows.Scan(&temp_user_name, &temp_score)
+		userNameMap[row_number] = append(userNameMap[row_number], temp_user_name)
+		scoreMap[row_number] = append(scoreMap[row_number], temp_score)
+		row_number += 1
+	}
+	rows.Close()
+	db.Close()
+	game.processedDB = true
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func main() {
 	ebiten.SetWindowSize(ScreenWidth, ScreenHeight)
 	ebiten.SetWindowTitle("Berserk/Tank Game by Trevor Wysong")
 	gameObject := Game{}
 	loadImage(&gameObject)
-
-	myDatabase := OpenDataBase("./LeaderBoard.db")
-	defer myDatabase.Close()
-	create_tables(myDatabase)
 
 	gameObject.tankTopper.xLoc = gameObject.playerSprite.xLoc
 	gameObject.tankTopper.yLoc = gameObject.playerSprite.yLoc
@@ -2079,6 +2418,18 @@ func loadImage(game *Game) {
 		log.Fatal("failed to load image", err)
 	}
 	game.titleScreenBackground.upPict = titleScreenBackground
+
+	winnerScreen, _, err := ebitenutil.NewImageFromFile("art assets/winner.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.winnerScreen.upPict = winnerScreen
+
+	loserScreen, _, err := ebitenutil.NewImageFromFile("art assets/loser.png")
+	if err != nil {
+		log.Fatal("failed to load image", err)
+	}
+	game.loserScreen.upPict = loserScreen
 
 	firstMap, _, err := ebitenutil.NewImageFromFile("art assets/Level1Correct.png")
 	if err != nil {

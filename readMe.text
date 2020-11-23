@@ -1,0 +1,49 @@
+************************
+* GO Berserk/Tank Game *
+* By Trevor Wysong     *
+************************
+
+**************
+* Directions *
+**************
+Use 'up arrow', 'left arrow', 'right arrow', and 'down arrow' to
+move the tank (player) sprite up, left, right, and down.
+
+Use 'W', 'A', 'D', 'S' keys to change the direction of the tank topper up, left, right, and down. The direction of
+the tank topper (or gun) will indicate the directions projectiles will fire.
+
+Use the 'Space' key to fire projectiles.
+
+Collect 2 or more gold piles in order to earn back a life. Only one extra life per game awarded. Only a max of 3 lives
+at all times during game. Hearts in the bottom left of the screen indicate how many lives the player has.
+
+Navigate through the 3 levels and destroy all of the enemies to win the game.
+Bumping into enemies, enemy projectiles, or walls will cost the player a life. If all lives are lost, the game is over.
+
+When the player is within a certain proximity of an enemy, the enemy's chase mode will be
+activated. The enemy will fire at the player and chase the player, rotating direction
+depending on the distance from the player in the x and y direction.
+
+**************************
+* Extra Credit Completed *
+**************************
+------------------------------
+Unique Sound FX for (40 pts):
+------------------------------
+
+- picking up gold
+- earning an extra life (2 or more gold pickups)
+- player death by wall or enemy projectile
+- player death by bumping into enemy
+- human enemy death
+- monster enemy takes damage
+- monster enemy death
+- game over
+- game won
+
+---------------------
+Extra life (25 pts):
+---------------------
+
+When a player picks up at least 2 stacks of gold the player will earn an extra life.
+This requires a minimum of 1050 pts.
