@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"database/sql"
-	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -290,6 +289,7 @@ type Game struct {
 	allScores                          bool
 	playerScores                       bool
 	currentPlayerAndScoreLeaderboard   bool
+	playerRespawnInvincibility         bool
 }
 
 var g Game
@@ -1541,8 +1541,13 @@ func (game *Game) manageLevel1CollisionDetection() {
 	if game.playerAndWallCollision == false {
 		game.playerAndWallCollision = wallCollisionCheckFirstLevel(game.playerSprite, 61)
 	} else {
-		game.playerSprite.yLoc = ScreenHeight / 2
-		game.playerSprite.xLoc = 74 //player width
+		if game.playerSprite.xLoc < ScreenWidth/2 {
+			game.playerSprite.yLoc = 450
+			game.playerSprite.xLoc = 650 //player width
+		} else if game.playerSprite.xLoc > ScreenWidth/2 {
+			game.playerSprite.yLoc = ScreenHeight / 2
+			game.playerSprite.xLoc = 74 //player width
+		}
 		game.playerAndWallCollision = false
 		game.deathCounter += 1
 		g.playerDeathAudioPlayer.Rewind()
@@ -1701,8 +1706,7 @@ func (game *Game) manageLevel2CollisionDetection() {
 	if game.playerAndWallCollision == false {
 		game.playerAndWallCollision = wallCollisionCheckSecondLevel(game.playerSprite, 61)
 	} else {
-		game.playerSprite.yLoc = ScreenHeight / 2
-		game.playerSprite.xLoc = 74 //player width
+		game.playerSprite.xLoc, game.playerSprite.yLoc = 100, 100
 		game.playerAndWallCollision = false
 		g.playerDeathAudioPlayer.Rewind()
 		g.playerDeathAudioPlayer.Play()
@@ -1806,7 +1810,7 @@ func (game *Game) manageLevel2CollisionDetection() {
 				if death == 1 {
 					g.enemyAndPlayerCollisionAudioPlayer.Rewind()
 					g.enemyAndPlayerCollisionAudioPlayer.Play()
-					game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+					game.playerSprite.xLoc, game.playerSprite.yLoc = 100, 100
 					game.deathCounter += death
 				}
 			}
@@ -1826,7 +1830,7 @@ func (game *Game) manageLevel2CollisionDetection() {
 						if death == 1 {
 							g.playerDeathAudioPlayer.Rewind()
 							g.playerDeathAudioPlayer.Play()
-							game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+							game.playerSprite.xLoc, game.playerSprite.yLoc = 100, 100
 							game.deathCounter += death
 						}
 
@@ -1861,8 +1865,7 @@ func (game *Game) manageLevel3CollisionDetection() {
 	if game.playerAndWallCollision == false {
 		game.playerAndWallCollision = wallCollisionCheckThirdLevel(game.playerSprite, 61)
 	} else {
-		game.playerSprite.yLoc = ScreenHeight / 2
-		game.playerSprite.xLoc = 74 //player width
+		game.playerSprite.xLoc, game.playerSprite.yLoc = 600, 100
 		game.playerAndWallCollision = false
 		g.playerDeathAudioPlayer.Rewind()
 		g.playerDeathAudioPlayer.Play()
@@ -1966,7 +1969,7 @@ func (game *Game) manageLevel3CollisionDetection() {
 				if death == 1 {
 					g.enemyAndPlayerCollisionAudioPlayer.Rewind()
 					g.enemyAndPlayerCollisionAudioPlayer.Play()
-					game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+					game.playerSprite.xLoc, game.playerSprite.yLoc = 600, 100
 					game.deathCounter += death
 				}
 			}
@@ -1984,7 +1987,7 @@ func (game *Game) manageLevel3CollisionDetection() {
 							projectileCollisionWithPlayer(game.playerSprite,
 								game.levelThreeEnemyList[i].enemyProjectileList[j], 61, 20)
 						if death == 1 {
-							game.playerSprite.xLoc, game.playerSprite.yLoc = 190, ScreenHeight*0.72
+							game.playerSprite.xLoc, game.playerSprite.yLoc = 600, 100
 							g.playerDeathAudioPlayer.Rewind()
 							g.playerDeathAudioPlayer.Play()
 							game.deathCounter += death
@@ -2053,8 +2056,6 @@ func (game *Game) checkLevel() {
 
 func (game *Game) Update() error {
 	game.checkLevel()
-	fmt.Println(len(currentPlayerMap))
-	fmt.Println(len(currentPlayerScoreMap))
 
 	if game.deathCounter >= 3 && game.gameWon == false {
 		if game.playedLoseSound == false {
@@ -2387,6 +2388,7 @@ func (game Game) Draw(screen *ebiten.Image) {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
 						tempHeight += 100
+						game.currentPlayerAndScoreLeaderboard = true
 					} else {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
@@ -2404,6 +2406,8 @@ func (game Game) Draw(screen *ebiten.Image) {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
 						tempHeight += 100
+						game.currentPlayerAndScoreLeaderboard = true
+
 					} else {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
@@ -2430,6 +2434,7 @@ func (game Game) Draw(screen *ebiten.Image) {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
 						tempHeight += 100
+						game.currentPlayerAndScoreLeaderboard = true
 					} else {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
@@ -2447,6 +2452,7 @@ func (game Game) Draw(screen *ebiten.Image) {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
 						tempHeight += 100
+						game.currentPlayerAndScoreLeaderboard = true
 					} else {
 						game.drawOps.GeoM.Reset()
 						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
@@ -2507,7 +2513,6 @@ func (game Game) processDBtoMaps() {
 		userNameMap[row_number] = append(userNameMap[row_number], temp_user_name)
 		scoreMap[row_number] = append(scoreMap[row_number], temp_score)
 		if temp_user_name == game.userName {
-			fmt.Println("here")
 			currentPlayerMap[current_player_row_number] = append(currentPlayerMap[current_player_row_number], temp_user_name)
 			currentPlayerScoreMap[current_player_row_number] = append(currentPlayerScoreMap[current_player_row_number], temp_score)
 			current_player_row_number += 1
