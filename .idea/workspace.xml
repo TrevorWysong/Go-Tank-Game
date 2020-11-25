@@ -2,24 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="00b1d884-569f-4270-84f5-2d92411e1285" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/art assets/loser.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/art assets/winner.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/readMe.text" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/death.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/enemy projectile.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/first monster hit.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/game over.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/health.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/human groan.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/monster death.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/projectile.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/spawn.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/teleport.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/sounds/win.wav" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/GameEngineDemo.go" beforeDir="false" afterPath="$PROJECT_DIR$/GameEngineDemo.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/GameEngineDemo.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerserkTankGame.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +45,16 @@
       <recent name="C:\Users\Trevx64\go\src\firstGame" />
     </key>
   </component>
-  <component name="RunManager" selected="Go Build.go build GameEngineDemo.go">
+  <component name="RunManager" selected="Go Build.go build BerserkTankGame.go">
+    <configuration name="go build BerserkTankGame.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="firstGame" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/BerserkTankGame.go" />
+      <package value="firstGame" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
     <configuration name="go build GameEngineDemo.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="firstGame" />
       <working_directory value="$PROJECT_DIR$" />
@@ -91,6 +84,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Build.go build BerserkTankGame.go" />
         <item itemvalue="Go Build.go build GameEngineDemo.go" />
         <item itemvalue="Go Build.go build testtext.go" />
         <item itemvalue="Go Build.go build keyboard.go" />
@@ -125,7 +119,8 @@
     <MESSAGE value="Added title screen and user input for username. Need to figure out the drawing to screen still." />
     <MESSAGE value="Added title screen with username drawing to screen properly. Supports A-Z 0-9 and backspace to delete." />
     <MESSAGE value="Print score during game to top right. Started adding database for leaderboard." />
-    <option name="LAST_COMMIT_MESSAGE" value="Print score during game to top right. Started adding database for leaderboard." />
+    <MESSAGE value="Added sound effects and sorted/processed database. Added game won and game over backgrounds and printed leaderboard to the screens." />
+    <option name="LAST_COMMIT_MESSAGE" value="Added sound effects and sorted/processed database. Added game won and game over backgrounds and printed leaderboard to the screens." />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -135,10 +130,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="521" y="214" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824@0.0.1536.824" timestamp="1606095260402" />
-    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1605999793675">
+    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1606096243597">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1605999793675" />
+    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1606096243597" />
     <state x="549" y="153" key="FileChooserDialogImpl" timestamp="1606083711992">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -147,26 +142,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="647" y="310" key="Github.ShareDialog/0.0.1536.824@0.0.1536.824" timestamp="1605381285752" />
-    <state width="1493" height="201" key="GridCell.Tab.0.bottom" timestamp="1606095099396">
+    <state width="1493" height="198" key="GridCell.Tab.0.bottom" timestamp="1606275856308">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="201" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1606095099396" />
-    <state width="1493" height="201" key="GridCell.Tab.0.center" timestamp="1606095099396">
+    <state width="1493" height="198" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1606275856308" />
+    <state width="1493" height="198" key="GridCell.Tab.0.center" timestamp="1606275856308">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="201" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1606095099396" />
-    <state width="1493" height="201" key="GridCell.Tab.0.left" timestamp="1606095099396">
+    <state width="1493" height="198" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1606275856308" />
+    <state width="1493" height="198" key="GridCell.Tab.0.left" timestamp="1606275856308">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="201" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1606095099396" />
-    <state width="1493" height="201" key="GridCell.Tab.0.right" timestamp="1606095099396">
+    <state width="1493" height="198" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1606275856308" />
+    <state width="1493" height="198" key="GridCell.Tab.0.right" timestamp="1606275856308">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="201" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1606095099396" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1605999798036">
+    <state width="1493" height="198" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1606275856308" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1606096248855">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1605999798036" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1606096248855" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1604453748557">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

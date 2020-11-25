@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"database/sql"
+	"fmt"
 	_ "fmt"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/audio"
@@ -286,11 +287,16 @@ type Game struct {
 	playedWinSound                     bool
 	playedLoseSound                    bool
 	extraLifeAwarded                   bool
+	allScores                          bool
+	playerScores                       bool
+	currentPlayerAndScoreLeaderboard   bool
 }
 
 var g Game
 var userNameMap = make(map[int][]string)
 var scoreMap = make(map[int][]int)
+var currentPlayerMap = make(map[int][]string)
+var currentPlayerScoreMap = make(map[int][]int)
 var dbUserNameList []string
 var dbUserNameListSorted []string
 var dbScoreList []int
@@ -337,6 +343,22 @@ func wallCollisionCheckFirstLevel(anySprite Sprite, spriteWidth int) bool {
 func (game *Game) iterateAndStoreUserName() {
 	for i := 0; i < len(game.userNameList); i++ {
 		game.userName += game.userNameList[i]
+	}
+}
+
+func (game *Game) getLeaderBoardFormat() {
+	if inpututil.IsKeyJustReleased(ebiten.KeySpace) {
+		if game.allScores == true && game.playerScores == false {
+			game.allScores = false
+			game.playerScores = true
+		} else if game.allScores == false && game.playerScores == true {
+			game.allScores = true
+			game.playerScores = false
+		} else {
+			game.allScores = true
+			game.playerScores = false
+		}
+		game.currentPlayerAndScoreLeaderboard = false
 	}
 }
 
@@ -1694,15 +1716,43 @@ func (game *Game) manageLevel2CollisionDetection() {
 				if game.levelTwoEnemyList[i].direction == "left" {
 					spriteWidth, _ := game.levelTwoEnemyList[i].leftPict.Size()
 					game.levelTwoEnemyList[i].collision = wallCollisionCheckSecondLevel(game.levelTwoEnemyList[i], spriteWidth)
+					if game.levelTwoEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelTwoEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelTwoEnemyList[i].direction == "right" {
 					spriteWidth, _ := game.levelTwoEnemyList[i].rightPict.Size()
 					game.levelTwoEnemyList[i].collision = wallCollisionCheckSecondLevel(game.levelTwoEnemyList[i], spriteWidth)
+					if game.levelTwoEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelTwoEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelTwoEnemyList[i].direction == "up" {
 					spriteWidth, _ := game.levelTwoEnemyList[i].upPict.Size()
 					game.levelTwoEnemyList[i].collision = wallCollisionCheckSecondLevel(game.levelTwoEnemyList[i], spriteWidth)
+					if game.levelTwoEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelTwoEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelTwoEnemyList[i].direction == "down" {
 					spriteWidth, _ := game.levelTwoEnemyList[i].downPict.Size()
 					game.levelTwoEnemyList[i].collision = wallCollisionCheckSecondLevel(game.levelTwoEnemyList[i], spriteWidth)
+					if game.levelTwoEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelTwoEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				}
 			} else {
 				if game.levelTwoEnemyList[i].health == 2 && game.levelTwoEnemyList[i].collision == true {
@@ -1826,15 +1876,43 @@ func (game *Game) manageLevel3CollisionDetection() {
 				if game.levelThreeEnemyList[i].direction == "left" {
 					spriteWidth, _ := game.levelThreeEnemyList[i].leftPict.Size()
 					game.levelThreeEnemyList[i].collision = wallCollisionCheckThirdLevel(game.levelThreeEnemyList[i], spriteWidth)
+					if game.levelThreeEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelThreeEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelThreeEnemyList[i].direction == "right" {
 					spriteWidth, _ := game.levelThreeEnemyList[i].rightPict.Size()
 					game.levelThreeEnemyList[i].collision = wallCollisionCheckThirdLevel(game.levelThreeEnemyList[i], spriteWidth)
+					if game.levelThreeEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelThreeEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelThreeEnemyList[i].direction == "up" {
 					spriteWidth, _ := game.levelThreeEnemyList[i].upPict.Size()
 					game.levelThreeEnemyList[i].collision = wallCollisionCheckThirdLevel(game.levelThreeEnemyList[i], spriteWidth)
+					if game.levelThreeEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelThreeEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				} else if game.levelThreeEnemyList[i].direction == "down" {
 					spriteWidth, _ := game.levelThreeEnemyList[i].downPict.Size()
 					game.levelThreeEnemyList[i].collision = wallCollisionCheckThirdLevel(game.levelThreeEnemyList[i], spriteWidth)
+					if game.levelThreeEnemyList[i].collision == true && spriteWidth == 50 {
+						g.monsterEnemyDeathAudioPlayer.Rewind()
+						g.monsterEnemyDeathAudioPlayer.Play()
+					} else if game.levelThreeEnemyList[i].collision == true && spriteWidth != 50 {
+						g.humanEnemyDeathAudioPlayer.Rewind()
+						g.humanEnemyDeathAudioPlayer.Play()
+					}
 				}
 			} else {
 				if game.levelThreeEnemyList[i].health == 2 && game.levelThreeEnemyList[i].collision == true {
@@ -1975,6 +2053,9 @@ func (game *Game) checkLevel() {
 
 func (game *Game) Update() error {
 	game.checkLevel()
+	fmt.Println(len(currentPlayerMap))
+	fmt.Println(len(currentPlayerScoreMap))
+
 	if game.deathCounter >= 3 && game.gameWon == false {
 		if game.playedLoseSound == false {
 			game.playedLoseSound = true
@@ -2026,12 +2107,14 @@ func (game *Game) Update() error {
 		create_tables(myDatabase)
 		game.addGameEntry(myDatabase)
 		game.dbEntryComplete = true
+		game.allScores = true
 		myDatabase.Close()
 	} else if game.startGame == true && game.gameWon == true && game.dbEntryComplete == false {
 		myDatabase := OpenDataBase("./LeaderBoard.db")
 		create_tables(myDatabase)
 		game.addGameEntry(myDatabase)
 		game.dbEntryComplete = true
+		game.allScores = true
 		myDatabase.Close()
 	} else if game.startGame == true && game.gameWon == true && game.dbEntryComplete == true && game.processedDB == false {
 		game.processDBtoMaps()
@@ -2040,9 +2123,9 @@ func (game *Game) Update() error {
 		game.processDBtoMaps()
 		game.processedDB = true
 	} else if game.startGame == true && game.gameWon == true && game.dbEntryComplete == true && game.processedDB == true {
-
+		game.getLeaderBoardFormat()
 	} else if game.startGame == true && game.gameOver == true && game.dbEntryComplete == true && game.processedDB == true {
-
+		game.getLeaderBoardFormat()
 	} else {
 		game.spawnLevel1Enemies()
 		game.changeTankDirection()
@@ -2294,29 +2377,82 @@ func (game Game) Draw(screen *ebiten.Image) {
 		screen.DrawImage(game.loserScreen.upPict, &game.drawOps)
 		game.drawOps.GeoM.Reset()
 		text.Draw(screen, "LEADERBOARD", mplusNormalFont, ScreenWidth*0.40, ScreenHeight*0.08, colornames.White)
-		if len(userNameMap) > 0 {
-			for i := 0; i < len(userNameMap) && i < 20; i++ {
-
-				game.drawOps.GeoM.Reset()
-				text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
-
-				tempHeight += 25
+		if game.allScores == true && game.playerScores == false {
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Press SPACE to switch to your top 5 scores.", mplusNormalFont, ScreenWidth*0.17, ScreenHeight*0.90, colornames.White)
+			if len(userNameMap) > 0 {
+				for i := 0; i < len(userNameMap) && i < 5; i++ {
+					if (game.currentPlayerAndScoreLeaderboard == false) && (userNameMap[i][0] ==
+						game.userName) && (scoreMap[i][0] == game.score) {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
+						tempHeight += 100
+					} else {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
+						tempHeight += 100
+					}
+				}
+			}
+		} else if game.playerScores == true && game.allScores == false {
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Press SPACE to switch to all players top 5 scores.", mplusNormalFont, ScreenWidth*0.15, ScreenHeight*0.90, colornames.White)
+			if len(currentPlayerMap) > 0 {
+				for i := 0; i < len(currentPlayerMap) && i < 5; i++ {
+					if (game.currentPlayerAndScoreLeaderboard == false) && (currentPlayerMap[i][0] ==
+						game.userName) && (currentPlayerScoreMap[i][0] == game.score) {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
+						tempHeight += 100
+					} else {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
+						tempHeight += 100
+					}
+				}
 			}
 		}
 	} else if game.startGame == true && game.gameOver == false && game.gameWon == true && game.processedDB == true {
 		tempHeight := 150
 		game.drawOps.GeoM.Reset()
+		game.drawOps.GeoM.Reset()
 		game.drawOps.GeoM.Translate(float64(game.winnerScreen.xLoc), float64(game.winnerScreen.yLoc))
 		screen.DrawImage(game.winnerScreen.upPict, &game.drawOps)
 		game.drawOps.GeoM.Reset()
 		text.Draw(screen, "LEADERBOARD", mplusNormalFont, ScreenWidth*0.40, ScreenHeight*0.08, colornames.White)
-		if len(userNameMap) > 0 {
-			for i := 0; i < len(userNameMap) && i < 20; i++ {
-
-				game.drawOps.GeoM.Reset()
-				text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
-
-				tempHeight += 25
+		if game.allScores == true && game.playerScores == false {
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Press SPACE to switch to your top 5 scores.", mplusNormalFont, ScreenWidth*0.17, ScreenHeight*0.90, colornames.White)
+			if len(userNameMap) > 0 {
+				for i := 0; i < len(userNameMap) && i < 5; i++ {
+					if (game.currentPlayerAndScoreLeaderboard == false) && (userNameMap[i][0] ==
+						game.userName) && (scoreMap[i][0] == game.score) {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
+						tempHeight += 100
+					} else {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+userNameMap[i][0]+": "+strconv.Itoa(scoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
+						tempHeight += 100
+					}
+				}
+			}
+		} else if game.playerScores == true && game.allScores == false {
+			game.drawOps.GeoM.Reset()
+			text.Draw(screen, "Press SPACE to switch to all players top 5 scores.", mplusNormalFont, ScreenWidth*0.15, ScreenHeight*0.90, colornames.White)
+			if len(currentPlayerMap) > 0 {
+				for i := 0; i < len(currentPlayerMap) && i < 5; i++ {
+					if (game.currentPlayerAndScoreLeaderboard == false) && (currentPlayerMap[i][0] ==
+						game.userName) && (currentPlayerScoreMap[i][0] == game.score) {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.Red)
+						tempHeight += 100
+					} else {
+						game.drawOps.GeoM.Reset()
+						text.Draw(screen, strconv.Itoa(i+1)+". "+currentPlayerMap[i][0]+": "+strconv.Itoa(currentPlayerScoreMap[i][0]), mplusNormalFont, ScreenWidth*0.15, tempHeight, colornames.White)
+						tempHeight += 100
+					}
+				}
 			}
 		}
 	}
@@ -2364,11 +2500,18 @@ func (game Game) processDBtoMaps() {
 	var temp_user_name string
 	var temp_score int
 	row_number := 0
+	current_player_row_number := 0
 
 	for rows.Next() {
 		err = rows.Scan(&temp_user_name, &temp_score)
 		userNameMap[row_number] = append(userNameMap[row_number], temp_user_name)
 		scoreMap[row_number] = append(scoreMap[row_number], temp_score)
+		if temp_user_name == game.userName {
+			fmt.Println("here")
+			currentPlayerMap[current_player_row_number] = append(currentPlayerMap[current_player_row_number], temp_user_name)
+			currentPlayerScoreMap[current_player_row_number] = append(currentPlayerScoreMap[current_player_row_number], temp_score)
+			current_player_row_number += 1
+		}
 		row_number += 1
 	}
 	rows.Close()
