@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="00b1d884-569f-4270-84f5-2d92411e1285" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BerserkTankGame.go" beforeDir="false" afterPath="$PROJECT_DIR$/BerserkTankGame.go" afterDir="false" />
-    </list>
+    <list default="true" id="00b1d884-569f-4270-84f5-2d92411e1285" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -96,7 +93,6 @@
     <option name="version" value="3" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="First commit for project 03 by Trevor Wysong" />
     <MESSAGE value="Second commit. I tried rotating sprites with built in method but the position gets offset around a circle and messed things up. I bruteforced the problem by loading in all directions of sprite and then drawing the corresponding one based on the last key press." />
     <MESSAGE value="Discarded old walls and created first map in tiled. Manually checked pixels by taking all out of bound rectangles and calculating pixels from origin by counting the tiles. Looks better, and I think it cut down on a lot of code and sprites." />
     <MESSAGE value="Added a topper to my tank sprite. I am using the tank because it is easy to tell which direction it is moving as well as which direction projectiles are going to go. The tank topper moves with keys 'A' 'S' 'D' 'W'. Tomorrow I will work on projectiles and enemies." />
@@ -121,7 +117,8 @@
     <MESSAGE value="Print score during game to top right. Started adding database for leaderboard." />
     <MESSAGE value="Added sound effects and sorted/processed database. Added game won and game over backgrounds and printed leaderboard to the screens." />
     <MESSAGE value="Added switch between top player scores and top all time scores. Highlighted current games player and score in red." />
-    <option name="LAST_COMMIT_MESSAGE" value="Added switch between top player scores and top all time scores. Highlighted current games player and score in red." />
+    <MESSAGE value="Fixed some spawning issues. Also fixed a logic glitch with leaderboard to show multiple colored scores if the same name and score was received multiple times." />
+    <option name="LAST_COMMIT_MESSAGE" value="Fixed some spawning issues. Also fixed a logic glitch with leaderboard to show multiple colored scores if the same name and score was received multiple times." />
   </component>
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
@@ -131,10 +128,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="521" y="214" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1536.824@0.0.1536.824" timestamp="1606095260402" />
-    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1606275983525">
+    <state x="0" y="0" key="CommitChangelistDialog2" timestamp="1606280626214">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1606275983525" />
+    <state x="0" y="0" key="CommitChangelistDialog2/0.0.1536.824@0.0.1536.824" timestamp="1606280626214" />
     <state x="549" y="153" key="FileChooserDialogImpl" timestamp="1606083711992">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -143,26 +140,26 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="647" y="310" key="Github.ShareDialog/0.0.1536.824@0.0.1536.824" timestamp="1605381285752" />
-    <state width="1493" height="198" key="GridCell.Tab.0.bottom" timestamp="1606280446969">
+    <state width="1493" height="198" key="GridCell.Tab.0.bottom" timestamp="1606280793455">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="198" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1606280446969" />
-    <state width="1493" height="198" key="GridCell.Tab.0.center" timestamp="1606280446969">
+    <state width="1493" height="198" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1606280793455" />
+    <state width="1493" height="198" key="GridCell.Tab.0.center" timestamp="1606280793455">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="198" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1606280446969" />
-    <state width="1493" height="198" key="GridCell.Tab.0.left" timestamp="1606280446968">
+    <state width="1493" height="198" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1606280793455" />
+    <state width="1493" height="198" key="GridCell.Tab.0.left" timestamp="1606280793455">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="198" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1606280446968" />
-    <state width="1493" height="198" key="GridCell.Tab.0.right" timestamp="1606280446969">
+    <state width="1493" height="198" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1606280793455" />
+    <state width="1493" height="198" key="GridCell.Tab.0.right" timestamp="1606280793455">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1493" height="198" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1606280446969" />
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1606276264915">
+    <state width="1493" height="198" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1606280793455" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2" timestamp="1606280632410">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1606276264915" />
+    <state x="361" y="145" key="Vcs.Push.Dialog.v2/0.0.1536.824@0.0.1536.824" timestamp="1606280632410" />
     <state x="431" y="145" width="672" height="678" key="search.everywhere.popup" timestamp="1604453748557">
       <screen x="0" y="0" width="1536" height="824" />
     </state>

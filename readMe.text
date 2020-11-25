@@ -47,3 +47,13 @@ Extra life (25 pts):
 
 When a player picks up at least 2 stacks of gold the player will earn an extra life.
 This requires a minimum of 1050 pts.
+
+------------------------
+Possible improvements:
+------------------------
+
+- Add better spawn system to avoid spawning player near enemies.
+- Add invincibility for 1-2 seconds after respawning.
+- Add more enemy movement logic so that if the player is in a range of the dominant direction they are moving
+ (i.e up/down or left/right) they will flip their direction to face the player and then start shooting at them. I only
+ did this for when the player is in close proximity to an enemy.
